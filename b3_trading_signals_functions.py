@@ -1,5 +1,7 @@
 import yfinance as yf
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("Agg")
 
 
 def load_tickers(filepath="tickers.txt"):

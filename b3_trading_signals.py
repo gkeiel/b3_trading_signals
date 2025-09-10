@@ -28,7 +28,7 @@ def main():
         # export current dataframe for analysis
         # df.to_excel("debug/df_debug.xlsx", index=True)
         
-        # stores results
+        # store results
         results.append({
             "Ticker": ticker,
             "MA_S": ma_s,
