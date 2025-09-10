@@ -1,3 +1,3 @@
-# Supervised machine learning
+# Brazilian stock trading signals
 
-A repository of algorithms supervised machine learning. Initially, it contains solutions for time-series prediction.
+A Python program for generating trading sinals focused on the Brazilian stock market. Currently under development.

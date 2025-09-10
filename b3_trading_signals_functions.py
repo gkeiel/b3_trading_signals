@@ -55,7 +55,7 @@ def plot_res(df, ticker, ma_s, ma_l):
     plt.figure(figsize=(12,6))
     plt.plot(df.index, df["Close"], label=f"{ticker}")
     plt.title(f"{ticker} - Price")
-    plt.title("Data")
+    plt.legend()
     plt.grid(True)
     plt.savefig(f"results/{ticker}.png", dpi=300, bbox_inches="tight")
     plt.close()

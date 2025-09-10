@@ -1,4 +1,3 @@
-
 import os
 import itertools
 import pandas as pd
@@ -16,7 +15,7 @@ def main():
     # import lists of parameters:
     # - tickers
     # - simple moving average (SMA) combinations
-    tickers = tsf.load_tickers("tickers.txt")
+    tickers = tsf.load_tickers("tickers_test.txt")
     ma_comb = tsf.load_ma_comb("ma_comb.txt")
 
     # run backtest for each ticker and strategy
