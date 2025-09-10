@@ -20,7 +20,7 @@ def load_ma_comb(filepath="ma_comb.txt"):
 
 def download_data(ticker, start, end):
     # collect OHLCVDS data from Yahoo Finance
-    df = yf.download(ticker, start, end)
+    df = yf.download(ticker, start, end, auto_adjust=True)
     df = df[["Close"]]
     return df
 
@@ -31,22 +31,22 @@ def run_strategy(df, ma_s, ma_l):
     # calculate indicators
     lab_ma_s = f"SMA{ma_s}"
     lab_ma_l = f"SMA{ma_l}"
-    df[lab_ma_s] = df["Close"].rolling(window=ma_s).mean()  # short MA
-    df[lab_ma_l] = df["Close"].rolling(window=ma_l).mean()  # long MA
+    df[lab_ma_s] = df["Close"].rolling(window=ma_s).mean()      # short MA
+    df[lab_ma_l] = df["Close"].rolling(window=ma_l).mean()      # long MA
     
-    # generate signals
+    # generate buy/sell signals
     df["Signal"] = 0
-    df.loc[df[lab_ma_s] > df[lab_ma_l], "Signal"] = 1   # buy
-    df.loc[df[lab_ma_s] < df[lab_ma_l], "Signal"] = -1  # sell
+    df.loc[df[lab_ma_s] > df[lab_ma_l], "Signal"] = 1           # buy signal
+    df.loc[df[lab_ma_s] < df[lab_ma_l], "Signal"] = -1          # sell signal
     
     # simulate execution (backtest)
-    df["Position"] = df["Signal"].shift(1)
-    df["Return"] = df["Close"].pct_change()
-    df["Strategy"] = df["Position"]*df["Return"]
+    df["Position"] = df["Signal"].shift(1)                      # position based in signal from previous sample
+    df["Return"] = df["Close"].pct_change()                     # asset percentage variation in relation to previous sample
+    df["Strategy"] = df["Position"]*df["Return"]                # return of the strategy
     
     # compare buy & hold vs current strategy
-    df["Cumulative_Market"] = (1 +df["Return"]).cumprod()
-    df["Cumulative_Strategy"] = (1 +df["Strategy"]).cumprod()
+    df["Cumulative_Market"] = (1 +df["Return"]).cumprod()       # cumulative return buy & hold strategy
+    df["Cumulative_Strategy"] = (1 +df["Strategy"]).cumprod()   # cumulative return current strategy
     return df    
 
 

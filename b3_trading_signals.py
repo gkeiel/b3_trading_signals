@@ -22,9 +22,11 @@ def main():
     for ticker, (ma_s, ma_l) in itertools.product(tickers, ma_comb):
         df = tsf.download_data(ticker, start, end)
         df = tsf.run_strategy(df, ma_s, ma_l)
-
         final_market   = df["Cumulative_Market"].iloc[-1]
         final_strategy = df["Cumulative_Strategy"].iloc[-1]
+
+        # export current dataframe for analysis
+        # df.to_excel("debug/df_debug.xlsx", index=True)
         
         # stores results
         results.append({
