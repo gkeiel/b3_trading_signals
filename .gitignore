@@ -1,8 +1,10 @@
 __pycache__/
 *.pyc
-
-results/*
-!results/.gitkeep
+.env
 
 debug/*
 !debug/.gitkeep
+report/*
+!report/.gitkeep
+results/*
+!results/.gitkeep

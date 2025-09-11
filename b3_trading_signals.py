@@ -21,20 +21,20 @@ def main():
     # run backtest for each ticker and strategy
     for ticker, (ma_s, ma_l) in itertools.product(tickers, ma_comb):
         df = tsf.download_data(ticker, start, end)
-        df = tsf.run_strategy(df, ma_s, ma_l)
-        final_market   = df["Cumulative_Market"].iloc[-1]
-        final_strategy = df["Cumulative_Strategy"].iloc[-1]
+        df = tsf.run_strategy(df[["Close"]], ma_s, ma_l)
+        market   = df["Cumulative_Market"].iloc[-1]
+        strategy = df["Cumulative_Strategy"].iloc[-1]
 
         # export current dataframe for analysis
-        # df.to_excel("debug/df_debug.xlsx", index=True)
+        df.to_excel("debug/df_debug.xlsx", index=True)
         
         # store results
         results.append({
             "Ticker": ticker,
             "MA_S": ma_s,
             "MA_L": ma_l,
-            "Final_Market": final_market,
-            "Final_Strategy": final_strategy
+            "Final_Market": market,
+            "Final_Strategy": strategy
         })
         tsf.plot_res(df, ticker, ma_s, ma_l)
 
