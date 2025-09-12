@@ -51,8 +51,9 @@ def main():
         
             if s != 0:
                 # signal alert message
-                verb = "BUY" if s == 1 else "SELL"
-                msg  = f"{a['Ticker']} -> Signal: {verb} (SMA{a['MA_S']}/{a['MA_L']}) -> Price: R${a['Close']:.2f}"
+                verb  = "BUY" if s == 1 else "SELL"
+                arrow = "⬆️" if s == 1 else "⬇️"
+                msg  = f"{a['Ticker']} | {arrow} {verb} (SMA{a['MA_S']}/{a['MA_L']}) | Price R${a['Close']:.2f}"
                 
                 # notifies via e-mail
                 try:
