@@ -56,9 +56,9 @@ def main():
                 
                 # notifies via e-mail
                 try:
-                    tsf.send_email(f"Signal {a['Ticker']} {verb}", msg)
-                except Exception as e:
-                    print("Error:", e)
+                    tsf.send_telegram(msg)
+                except Exception as err:
+                    print("Telegram error:", err)
 
         # export report
         results_df = pd.DataFrame(report)

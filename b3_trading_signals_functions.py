@@ -1,9 +1,9 @@
+import os
 import yfinance as yf
 import matplotlib.pyplot as plt
 import matplotlib 
 import smtplib
-import os
-from email.message import EmailMessage
+import requests
 from dotenv import load_dotenv
 matplotlib.use("Agg")
 
@@ -78,22 +78,13 @@ def plot_res(df, ticker, ma_s, ma_l):
     plt.close()
 
 
-def send_email(subject, body):
-    msg = EmailMessage()
-    msg["From"]    = 'gkeiel@hotmail.com'
-    msg["To"]      = 'gkeiel@hotmail.com'
-    msg["Subject"] = subject
-    msg.set_content(body)
+def send_telegram(msg):
+    load_dotenv()
+    TOKEN   = os.getenv("TOKEN")
+    CHAT_ID = os.getenv("CHAT_ID")
 
-    load_dotenv()                                           # load private variable from .env
-    SMTP_SERVER = os.environ.get("SMTP_SERVER")             # smtp.office365.com
-    SMTP_PORT   = int(os.environ.get("SMTP_PORT", "587"))   # 
-    SMTP_USER   = os.environ.get("SMTP_USER")               # e-mail
-    SMTP_PASS   = os.environ.get("SMTP_PASS")               # password
-
-    # SMTP client
-    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as smtp:
-        smtp.starttls()
-        smtp.login(SMTP_USER, SMTP_PASS)
-        smtp.send_message(msg)
-    print("E-mail sent.") 
+    url     = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+    payload = {"chat_id": CHAT_ID, "text": msg}
+    r = requests.post(url, json=payload, timeout=10)
+    r.raise_for_status()
+    print("Telegram sent.") 
