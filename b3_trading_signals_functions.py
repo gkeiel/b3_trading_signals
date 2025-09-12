@@ -87,4 +87,4 @@ def send_telegram(msg):
     payload = {"chat_id": CHAT_ID, "text": msg}
     r = requests.post(url, json=payload, timeout=10)
     r.raise_for_status()
-    print("Telegram sent.") 
+    print("Telegram sent.")
