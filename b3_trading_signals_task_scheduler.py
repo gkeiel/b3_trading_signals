@@ -13,7 +13,7 @@ os.chdir(script_dir)
 script_path = script_dir+"/b3_trading_signals_bot.py"
 
 # script time
-script_hour = "17:05"
+script_hour = "19:03"
 
 # task name in Windows Task Scheduler
 task_name = "b3_trading_signals_bot"

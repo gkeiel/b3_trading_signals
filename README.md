@@ -1,24 +1,25 @@
 # Sinais de negociação B3
 
-Este projeto oferece um conjunto de scripts Python para gerar sinais de compra e venda para a Bolsa de Valores Brasileira (B3), utilizando o cruzamento de médias móveis simples (SMA) de curto e longo prazo. Novos indicadores poderão ser incorporados no futuro.
+Este projeto oferece um conjunto de scripts Python para gerar sinais de compra e venda para a Bolsa de Valores Brasileira (B3), aplicando o cruzamento de médias móveis simples (SMA) de curto e longo prazo em séries temporais de ativos do mercado a vista. Novos indicadores poderão ser incorporados no futuro.
 
 ## 📊 Funcionalidades
 
-- **Cálculo de médias móveis**: Implementa SMA de curto e longo prazo para identificar tendências.
-- **Notificações via Telegram**: Envia sinais de negociação diretamente para o smartphone.
+- **Download de dados**: Realiza o download de dados de mercado pela API Yahoo Finance.
+- **Cálculo de médias móveis**: Implementa estratégias SMA de curto e longo prazo para identificar tendências.
+- ***Backtesting* das estratégias**: Realiza teste das estratégias com dados históricos, gerando figuras e resumo para tomada de decisão.
+- **Notificações via Telegram**: Envia sinais de negociação provenientes da estratégia selecionada diretamente para o *smartphone*.
 - **Agendamento automático**: Cria tarefas no Agendador de Tarefas do Windows para execução diária.
-- **Arquivos de configuração**: Utiliza arquivos `.txt` para listagem de tickers e combinações de SMA.
-
+- **Arquivos de configuração**: Utiliza `.env` para variáveis de ambiente privadas `.txt` para lista de *tickers* e lista das combinações de SMA.
 
 ## ⚙️ Como Usar
 
 1. **Instalar dependências**:
-    ```bash
+   ```bash
     pip install pandas
     pip install numpy
+    pip install yfinance
     pip install requests
     pip install python-dotenv
-    pip install python-telegram-bot
     ```
 
 2. **Configurar *tickers***
@@ -54,5 +55,13 @@ Este projeto oferece um conjunto de scripts Python para gerar sinais de compra e
 
 ## 📌 Observações
 
-- O projeto está em desenvolvimento ocasional durante horário de lazer e poderá sofrer constantes alterações.
+- O projeto está em desenvolvimento ocasional apenas durante horário de lazer e poderá sofrer constantes alterações.
 - Contribuições são bem-vindas! Abra uma *issue* ou envie um *pull request*.
+
+## 🤝 Contato
+
+- Para projetos avançados e personalizados, entrar em contato com o desenvolvedor.
+- Sobre as qualificações do referido profissional:
+  - A quantidade de desenvolvedores, por vezes mais habilidosos, disponíveis no mercado é enorme;
+  - A quantidade de desenvolvedores que entendem de mercado financeiro e análise de séries financeiras é razoável;
+  - A quantidade de desenvolvedores que entendem de análise de séries financeiras e teoria de análise/controle de sistemas (filtragem, estimação, análise frequencial) é mínima.

@@ -2,7 +2,6 @@ import os
 import yfinance as yf
 import matplotlib.pyplot as plt
 import matplotlib 
-import smtplib
 import requests
 from dotenv import load_dotenv
 matplotlib.use("Agg")
