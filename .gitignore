@@ -9,5 +9,5 @@ report/*
 results/*
 !results/.gitkeep
 
-tickers_test
-ma_comb_test
+tickers_test.txt
+strategies_test.txt

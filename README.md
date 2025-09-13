@@ -1,6 +1,6 @@
 # Sinais de negociação B3
 
-Este projeto oferece um conjunto de scripts Python para gerar sinais de compra e venda para a Bolsa de Valores Brasileira (B3), aplicando o cruzamento de médias móveis simples (SMA) de curto e longo prazo em séries temporais de ativos do mercado a vista. Novos indicadores poderão ser incorporados no futuro.
+Este projeto oferece um conjunto de scripts Python para gerar sinais de compra e venda para a Bolsa de Valores Brasileira (B3), aplicando o cruzamento de médias móveis simples (SMA) de curto e longo prazo em séries temporais de ativos do mercado à vista. Novos indicadores e funcionalidades poderão ser incorporados no futuro.
 
 ## 📊 Funcionalidades
 
@@ -50,13 +50,17 @@ Este projeto oferece um conjunto de scripts Python para gerar sinais de compra e
 - `b3_trading_signals_bot.py` → Arquivo para geração de sinais diários e notificações via Telegram.
 - `b3_trading_signals_task_scheduler.py` → Criação de execução agendada no Windows.
 - `b3_trading_signals_functions.py` → Funções auxiliares reutilizáveis.
-- `tickers.txt` → Lista de tickers a serem monitorados.
+- `tickers.txt` → Lista de *tickers* a serem monitorados.
 - `ma_comb.txt` → Lista de indicadores SMA para análise.
 
 ## 📌 Observações
 
 - O projeto está em desenvolvimento ocasional apenas durante horário de lazer e poderá sofrer constantes alterações.
 - Contribuições são bem-vindas! Abra uma *issue* ou envie um *pull request*.
+- Sanando possíveis dúvidas:
+  - API Yahoo Finance: latência de 15 minutos para dados intradiários, sem limite de requisições;
+  - API Brapi em seu plano gratuito: latência de 30 minutos, limite mensal de 15000 requisições;
+  - Outras APIs: latências similares e envolvem custo.
 
 ## 🤝 Contato
 

@@ -5,16 +5,16 @@ from datetime import datetime
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-ma_s = 5
-ma_l = 10
-
+# insert best strategy
+ma_s = 10
+ma_l = 20
+pair = (ma_s, ma_l)
 
 def main():
     # define start and end time
     start  = "2023-01-01"
     end    = datetime.now().strftime("%Y-%m-%d")
     alerts = []
-    pair   = (ma_s, ma_l)
 
     # import parameters:
     # - tickers
@@ -28,32 +28,31 @@ def main():
         df = tsf.download_data(ticker, start, end)
         df = tsf.run_strategy(df[["Close"]], pair[0], pair[1])
 
-        # verify last: price, signal, position
+        # verify last: price, signal, signal strength
         last_clo = df["Close"].iloc[-1]
         last_sig = df["Signal"].iloc[-1]
-        last_pos = df["Position"].iloc[-1]
+        last_str = df["Signal_Strength"].iloc[-1]
         
         # store report
         alerts.append({
             "Ticker": ticker,
             "MA_S": pair[0],
             "MA_L": pair[1],
-            "Close": float(last_clo),
+            "Close": float(last_clo.iloc[0]),
             "Signal": int(last_sig),
-            "Position": int(last_pos)
+            "Signal_Strength": int(last_str)
         })
 
         report = [f"Report: {end}", f"SMA: {pair[0]}/{pair[1]}", ""]
         for a in alerts:
             s = a["Signal"]
-            line = f"{a['Ticker']}: Signal={s}, Position={a['Position']}, Close={a['Close']:.2f}"
+            line = f"{a['Ticker']}: Signal={s}, Signal={a['Signal_Strength']}, Close={a['Close']:.2f}"
             report.append(line)
         
             if s != 0:
-                # signal alert message
-                verb  = "BUY" if s == 1 else "SELL"
-                arrow = "⬆️" if s == 1 else "⬇️"
-                msg  = f"{a['Ticker']} | {arrow} {verb} (SMA{a['MA_S']}/{a['MA_L']}) | Price R${a['Close']:.2f}"
+                # trading signal message
+                verb = "⬆️ BUY" if s == 1 else "⬇️ SELL"
+                msg  = f"{a['Ticker']} | {verb} (SMA{a['MA_S']}/{a['MA_L']}) Strength {a['Signal_Strength']:d} | Price R${a['Close']:.2f}"
                 
                 # notifies via e-mail
                 try:
@@ -62,8 +61,8 @@ def main():
                     print("Telegram error:", err)
 
         # export report
-        results_df = pd.DataFrame(report)
-        results_df.to_excel("report/report.xlsx", index=False)
+        report_df = pd.DataFrame(report)
+        report_df.to_excel("report/report.xlsx", index=False)
 
 
 if __name__ == "__main__":

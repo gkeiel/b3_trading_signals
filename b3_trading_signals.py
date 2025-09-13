@@ -14,9 +14,9 @@ def main():
 
     # import lists of parameters:
     # - tickers
-    # - simple moving average (SMA) combinations
+    # - strategies: simple moving average (SMA) combinations
     tickers = tsf.load_tickers("tickers_test.txt")
-    ma_comb = tsf.load_ma_comb("ma_comb.txt")
+    ma_comb = tsf.load_strategies("strategies_test.txt")
 
     # run backtest for each ticker and strategy
     for ticker, (ma_s, ma_l) in itertools.product(tickers, ma_comb):

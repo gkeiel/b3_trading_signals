@@ -7,13 +7,13 @@ from dotenv import load_dotenv
 matplotlib.use("Agg")
 
 
-def load_tickers(filepath="tickers.txt"):
+def load_tickers(filepath):
     with open(filepath, "r", encoding="utf-8") as f:
         tickers = [line.strip() for line in f if line.strip()]
     return tickers
 
 
-def load_ma_comb(filepath="ma_comb.txt"):
+def load_strategies(filepath):
     ma_comb = []
     with open(filepath, "r", encoding="utf-8") as f:
         for line in f:
@@ -41,11 +41,13 @@ def run_strategy(df, ma_s, ma_l):
     
     # generate buy/sell signals
     df["Signal"] = 0
-    df.loc[df[lab_ma_s] > df[lab_ma_l], "Signal"] = 1           # buy signal
-    df.loc[df[lab_ma_s] < df[lab_ma_l], "Signal"] = -1          # sell signal
-    
+    df.loc[df[lab_ma_s] > df[lab_ma_l], "Signal"] = 1           # buy signal  ->  1
+    df.loc[df[lab_ma_s] < df[lab_ma_l], "Signal"] = -1          # sell signal -> -1
+    df["Signal_Strength"] = df["Signal"].groupby((df["Signal"] != df["Signal"].shift()).cumsum()).cumcount() +1  # consecutive samples with same signal
+    df.loc[df["Signal"] == 0, "Signal_Strength"] = 0            # but strength is zero while there is no signal
+
     # simulate execution (backtest)
-    df["Position"] = df["Signal"].shift(1)                      # position based in signal from previous sample
+    df["Position"] = df["Signal"].shift(1)                      # simulate position using signal from previous sample
     df["Return"] = df["Close"].pct_change()                     # asset percentage variation in relation to previous sample
     df["Strategy"] = df["Position"]*df["Return"]                # return of the strategy
     
