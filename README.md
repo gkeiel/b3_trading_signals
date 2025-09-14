@@ -1,15 +1,15 @@
 # Sinais de negociação B3
 
-Este projeto oferece um conjunto de scripts Python para gerar sinais de compra e venda para a Bolsa de Valores Brasileira (B3), aplicando o cruzamento de médias móveis simples (SMA) de curto e longo prazo em séries temporais de ativos do mercado à vista. Novos indicadores e funcionalidades poderão ser incorporados no futuro.
+Este projeto oferece um conjunto de scripts Python para geração de sinais de compra e venda para a Bolsa de Valores Brasileira (B3), aplicando o cruzamento de médias móveis simples (SMA) de curto e longo prazo em séries temporais de ativos do mercado à vista. Novos indicadores e funcionalidades poderão ser incorporados no futuro.
 
 ## 📊 Funcionalidades
 
 - **Download de dados**: Realiza o download de dados de mercado pela API Yahoo Finance.
 - **Cálculo de médias móveis**: Implementa estratégias SMA de curto e longo prazo para identificar tendências.
 - ***Backtesting* das estratégias**: Realiza teste das estratégias com dados históricos, gerando figuras e resumo para tomada de decisão.
-- **Notificações via Telegram**: Envia sinais de negociação provenientes da estratégia selecionada diretamente para o *smartphone*.
+- **Notificações via Telegram**: Envia sinais de negociação provenientes da estratégia selecionada diretamente para o *smartphone*/computador.
 - **Agendamento automático**: Cria tarefas no Agendador de Tarefas do Windows para execução diária.
-- **Arquivos de configuração**: Utiliza `.env` para variáveis de ambiente privadas `.txt` para lista de *tickers* e lista das combinações de SMA.
+- **Arquivos de configuração**: Utiliza `.env` para variáveis de ambiente privadas e `.txt` para lista de códigos e lista de indicadores.
 
 ## ⚙️ Como Usar
 
@@ -22,15 +22,16 @@ Este projeto oferece um conjunto de scripts Python para gerar sinais de compra e
     pip install python-dotenv
     ```
 
-2. **Configurar *tickers***
+2. **Configurar códigos e estratégias**
    - Em `tickers.txt` adicione os códigos das ações que deseja monitorar, um por linha.
+   - Em `indicators.txt` adicione os indicadores que deseja gerar, um por linha. Inicialmente apenas SMA são implementáveis.
 
 3. **Configurar Telegram**
-   - Crie um bot no Telegram e obtenha o seu `TOKEN` e `CHAT_ID`.
+   - Crie um *bot* no Telegram e obtenha o seu `TOKEN` e `CHAT_ID`.
    - Adicione-os em `.env` para serem lidos por `b3_trading_signals_bot.py`.
 
 4. **Executar o script**
-   - Para rodar batelada de *backtesting* execute:
+   - Para rodar a batelada de *backtesting* execute:
      ```bash
      python b3_trading_signals.py
      ```
@@ -51,11 +52,11 @@ Este projeto oferece um conjunto de scripts Python para gerar sinais de compra e
 - `b3_trading_signals_task_scheduler.py` → Criação de execução agendada no Windows.
 - `b3_trading_signals_functions.py` → Funções auxiliares reutilizáveis.
 - `tickers.txt` → Lista de *tickers* a serem monitorados.
-- `ma_comb.txt` → Lista de indicadores SMA para análise.
+- `indicators.txt` → Lista de indicadores SMA para análise.
 
 ## 📌 Observações
 
-- O projeto está em desenvolvimento ocasional apenas durante horário de lazer e poderá sofrer constantes alterações.
+- O projeto está em desenvolvimento ocasional apenas durante horário de lazer e poderá sofrer alterações.
 - Contribuições são bem-vindas! Abra uma *issue* ou envie um *pull request*.
 - Sanando possíveis dúvidas:
   - API Yahoo Finance: latência de 15 minutos para dados intradiários, sem limite de requisições;
