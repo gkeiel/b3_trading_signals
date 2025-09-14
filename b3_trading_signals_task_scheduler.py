@@ -10,18 +10,19 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
 # script path
-script_path = script_dir+"/b3_trading_signals_bot.py"
+script_path = os.path.join(script_dir, "b3_trading_signals_bot.py")
 
-# script time
-script_hour = "21:00"
+# time for daily script
+script_hour = "17:05"
 
 # task name in Windows Task Scheduler
 task_name = "b3_trading_signals_bot"
 
 # command to create the scheduled task:
 # /F overwrite current task
-# /TR command to be executed 
-task_command = f'schtasks /Create /SC DAILY /TN "{task_name}" /TR "{sys.executable} {script_path}" /ST {script_hour} /F'
+# /TR command to be executed
+task_command = f'schtasks /Create /SC DAILY /TN "{task_name}" /TR "{sys.executable} {script_path}" /ST {script_hour} /F' # each daily
+# task_command = f'schtasks /Create /SC MINUTE /MO 2 /TN "{task_name}" /TR "{sys.executable} {script_path}" /F' # each X minutes
 
 # execute
 result = os.system(task_command)
