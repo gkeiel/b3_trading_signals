@@ -22,7 +22,7 @@ Este projeto oferece um conjunto de scripts Python para geração de sinais de c
     pip install python-dotenv
     ```
 
-2. **Configurar códigos e estratégias**
+2. **Configurar códigos e indicadores**
    - Em `tickers.txt` adicione os códigos das ações que deseja monitorar, um por linha.
    - Em `indicators.txt` adicione os indicadores que deseja gerar, um por linha. Inicialmente apenas SMA são implementáveis.
 

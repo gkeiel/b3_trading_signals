@@ -13,14 +13,14 @@ def load_tickers(filepath):
     return tickers
 
 
-def load_strategies(filepath):
-    ma_comb = []
+def load_indicators(filepath):
+    indicators = []
     with open(filepath, "r", encoding="utf-8") as f:
         for line in f:
             if line.strip():
                 s, l = line.strip().split(",")
-                ma_comb.append((int(s), int(l)))
-    return ma_comb
+                indicators.append((int(s), int(l)))
+    return indicators
 
 
 def download_data(ticker, start, end):
@@ -45,9 +45,10 @@ def run_strategy(df, ma_s, ma_l):
     df.loc[df[lab_ma_s] < df[lab_ma_l], "Signal"] = -1          # sell signal -> -1
     df["Signal_Strength"] = df["Signal"].groupby((df["Signal"] != df["Signal"].shift()).cumsum()).cumcount() +1  # consecutive samples with same signal
     df.loc[df["Signal"] == 0, "Signal_Strength"] = 0            # but strength is zero while there is no signal
-
+    
     # simulate execution (backtest)
     df["Position"] = df["Signal"].shift(1)                      # simulate position using signal from previous sample
+    df.loc[df["Position"] == -1, "Position"] = 0                # comment if also desired selling operations
     df["Return"] = df["Close"].pct_change()                     # asset percentage variation in relation to previous sample
     df["Strategy"] = df["Position"]*df["Return"]                # return of the strategy
     

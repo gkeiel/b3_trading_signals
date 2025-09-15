@@ -8,18 +8,18 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def main():
     # define start and end time
-    start   = "2023-01-01"
+    start   = "2024-01-01"
     end     = datetime.now()
     results = []
 
     # import lists of parameters:
     # - tickers
     # - strategies: simple moving average (SMA) combinations
-    tickers = tsf.load_tickers("tickers_test.txt")
-    ma_comb = tsf.load_strategies("strategies_test.txt")
+    tickers    = tsf.load_tickers("tickers_test.txt")
+    indicators = tsf.load_indicators("indicators_test.txt")
 
     # run backtest for each ticker and strategy
-    for ticker, (ma_s, ma_l) in itertools.product(tickers, ma_comb):
+    for ticker, (ma_s, ma_l) in itertools.product(tickers, indicators):
         df = tsf.download_data(ticker, start, end)
         df = tsf.run_strategy(df[["Close"]], ma_s, ma_l)
         market   = df["Cumulative_Market"].iloc[-1]

@@ -6,13 +6,14 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 # insert best strategy
-ma_s = 10
-ma_l = 20
+ma_s = 5
+ma_l = 30
+indicators = []
 pair = (ma_s, ma_l)
 
 def main():
     # define start and end time
-    start  = "2023-01-01"
+    start  = "2024-01-01"
     end    = datetime.now().strftime("%Y-%m-%d")
     alerts = []
 
@@ -44,25 +45,26 @@ def main():
         })
 
         report = [f"Report: {end}", f"SMA: {pair[0]}/{pair[1]}", ""]
-        for a in alerts:
-            s = a["Signal"]
-            line = f"{a['Ticker']}: Signal={s}, Signal={a['Signal_Strength']}, Close={a['Close']:.2f}"
-            report.append(line)
+    
+    for a in alerts:
+        s = a["Signal"]
+        line = f"{a['Ticker']}: Signal={s}, Signal={a['Signal_Strength']}, Close={a['Close']:.2f}"
+        report.append(line)
         
-            if s != 0:
-                # trading signal message
-                verb = "⬆️ BUY" if s == 1 else "⬇️ SELL"
-                msg  = f"{a['Ticker']} | {verb} (SMA{a['MA_S']}/{a['MA_L']}) Strength {a['Signal_Strength']:d} | Price R${a['Close']:.2f}"
+        if s != 0:
+            # trading signal message
+            verb = "⬆️ BUY" if s == 1 else "⬇️ SELL"
+            msg  = f"{a['Ticker']} | {verb} (SMA{a['MA_S']}/{a['MA_L']}) Strength {a['Signal_Strength']:d} | Price R${a['Close']:.2f}"
                 
-                # notifies via e-mail
-                try:
-                    tsf.send_telegram(msg)
-                except Exception as err:
-                    print("Telegram error:", err)
+            # notifies via e-mail
+            try:
+                tsf.send_telegram(msg)
+            except Exception as err:
+                print("Telegram error:", err)
 
-        # export report
-        report_df = pd.DataFrame(report)
-        report_df.to_excel("report/report.xlsx", index=False)
+    # export report
+    report_df = pd.DataFrame(report)
+    report_df.to_excel("report/report.xlsx", index=False)
 
 
 if __name__ == "__main__":
