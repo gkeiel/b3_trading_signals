@@ -43,7 +43,24 @@ Este projeto oferece um conjunto de scripts Python para geração de sinais de c
      ```bash
      python b3_trading_signals_task_scheduler.py
      ```
+## 🖼️ Exemplos de saídas
 
+Após a execução dos scripts, são gerados gráficos e saídas como os mostrados nos exemplos abaixo:
+
+- **Gráfico do *backtest* com SMA 5/30**
+<p align="center">
+<img width="733" height="395" alt="B3SA3 SA_5_30" src="https://github.com/user-attachments/assets/5f7c268b-1265-405a-a42f-a59f89729cd4"/>
+<img width="733" height="395" alt="B3SA3 SA_backtest_5_30" src="https://github.com/user-attachments/assets/c0cbff4a-7189-43dd-b6bc-000b4cea62b0"/>
+</p>
+
+Note como o ativo encerra o período avaliado próximo ao valor inicial, de modo que a estratégia *Buy & hold* resultaria em retorno nulo. Por outro lado a estratégia SMA 5/30, caso fosse seguida à risca, proporcionaria ao final do período um retorno de 20% sobre o valor investido, desconsiderando taxas de negociação. Ademais, a operação de venda a descoberto foi desconsiderada nos cálculos de retorno devido as taxas de aluguel envolvidas, embora possa facilmente habilitada no *bactesting*.
+
+- **Sinal de negociação enviado via Telegram**
+<p align="center">
+<img width="480" height="511" alt="telegram" src="https://github.com/user-attachments/assets/84a83c60-ac94-4759-bddf-b9708b5199f2" />
+</p>
+
+Note como é gerado um sinal de negociação para cada ativo, sugerindo a tendência de alta ou baixa baseado na melhor estratégia definida pelo operador e o acumulado dessa tendência, que mostra a quantas amostras a tendência não trocou de lado. 
 
 ## 🧩 Estrutura do Projeto
 
@@ -61,7 +78,7 @@ Este projeto oferece um conjunto de scripts Python para geração de sinais de c
 - Sanando possíveis dúvidas:
   - API Yahoo Finance: latência de 15 minutos para dados intradiários, sem limite de requisições;
   - API Brapi em seu plano gratuito: latência de 30 minutos, limite mensal de 15000 requisições;
-  - Outras APIs: latências similares e envolvem custo.
+  - Outras APIs: latências similares e/ou envolvem custo.
 
 ## 🤝 Contato
 
