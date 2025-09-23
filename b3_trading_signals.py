@@ -24,7 +24,7 @@ def main():
     # download data and run backtest (for each ticker and strategy)
     for ticker, (ma_s, ma_l) in itertools.product(tickers, indicators):
 
-        # download data (once only)
+        # download data (only once)
         if ticker not in data_cache:
             data_cache[ticker] = tsf.download_data(ticker, start, end)
         df = data_cache[ticker]
@@ -32,11 +32,8 @@ def main():
         # run backtest
         df = tsf.run_strategy(df[["Close"]], ma_s, ma_l)
 
-        market   = df["Cumulative_Market"].iloc[-1]
-        strategy = df["Cumulative_Strategy"].iloc[-1]
-
-        # export current dataframe for analysis
-        df.to_excel("debug/df_debug.xlsx", index=True)
+        # export dataframe for further analysis (optional)
+        df.to_excel(f"debug/df_{ticker}_{ma_s}_{ma_l}.xlsx", index=True)
 
         # initialize ticker list
         if ticker not in results:
@@ -44,10 +41,10 @@ def main():
         
         # store results
         results[ticker].append({
-            "MA_S": ma_s,
-            "MA_L": ma_l,
-            "Return_Market": market,
-            "Return_Strategy": strategy
+            "MA_Short": ma_s,
+            "MA_Long": ma_l,
+            "Return_Market": df["Cumulative_Market"].iloc[-1],
+            "Return_Strategy": df["Cumulative_Strategy"].iloc[-1]
         })
         tsf.plot_res(df, ticker, ma_s, ma_l)
 

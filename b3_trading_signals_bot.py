@@ -48,7 +48,7 @@ def main():
     
     for a in alerts:
         s = a["Signal"]
-        line = f"{a['Ticker']}: Signal={s}, Signal={a['Signal_Strength']}, Close={a['Close']:.2f}"
+        line = f"{a['Ticker']}: Signal={s}, Strength={a['Signal_Strength']}, Close={a['Close']:.2f}"
         report.append(line)
         
         if s != 0:
