@@ -4,8 +4,6 @@ __pycache__/
 
 debug/*
 !debug/.gitkeep
-report/*
-!report/.gitkeep
 results/*
 !results/.gitkeep
 

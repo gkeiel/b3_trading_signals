@@ -4,3 +4,4 @@ matplotlib
 yfinance
 requests
 dotenv
+openpyxl 
