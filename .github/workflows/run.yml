@@ -22,4 +22,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run script
+        env:
+          TOKEN: ${{ secrets.TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
         run: python b3_trading_signals_bot.py
