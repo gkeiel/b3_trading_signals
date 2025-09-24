@@ -3,3 +3,4 @@ numpy
 matplotlib
 yfinance
 requests
+dotenv
