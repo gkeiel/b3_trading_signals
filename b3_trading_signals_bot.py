@@ -64,7 +64,7 @@ def main():
 
     # export current report
     report_df = pd.DataFrame(report)
-    report_df.to_excel("report/report.xlsx", index=False)
+    # report_df.to_excel("report/report.xlsx", index=False)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,26 @@
+name: B3 trading signals bot
+
+on:
+  schedule:
+    - cron: "0 20 * * *"  # run daily at 20:00 UTC = 17:00 Brasilia
+  workflow_dispatch:      # run manualy if desired
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run script
+        run: python b3_trading_signals_bot.py
