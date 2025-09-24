@@ -5,10 +5,13 @@ from datetime import datetime
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-# import selected strategies:
-# - tickers
-# - indicators
-strategies = pd.read_csv("strategies.csv").set_index("Ticker").to_dict("index")
+# import strategies in strategies.csv: tickers, indicators
+# from local folder
+csv_file   = "strategies.csv"
+# from url
+csv_file   = "https://drive.google.com/uc?export=download&id=1uwzEz3XullFI02U8QhsE3BCFGRliRZu2"
+
+strategies = pd.read_csv(csv_file).set_index("Ticker").to_dict("index")
 tickers    = list(strategies.keys())
 
 
@@ -17,6 +20,7 @@ def main():
     start  = "2024-01-01"
     end    = datetime.now().strftime("%Y-%m-%d")
     alerts = []
+    report = []
 
     # run for each ticker
     for ticker in tickers:
@@ -44,17 +48,15 @@ def main():
             "Signal": int(last_sig),
             "Signal_Strength": int(last_str)
         })
-        report = [f"Report: {end}", f"SMA: {ma_s}/{ma_l}", ""]
     
     for a in alerts:
         s = a["Signal"]
-        line = f"{a['Ticker']}: Signal={s}, Strength={a['Signal_Strength']}, Close={a['Close']:.2f}"
-        report.append(line)
-        
-        if s != 0:
+
+        if s != 0:       
             # trading signal message
             verb = "⬆️ BUY" if s == 1 else "⬇️ SELL"
             msg  = f"{a['Ticker']} | {verb} (SMA{a['MA_S']}/{a['MA_L']}) Strength {a['Signal_Strength']:d} | Price R${a['Close']:.2f}"
+            report.append(msg)
                 
             # notifies via Telegram
             try:
@@ -63,8 +65,9 @@ def main():
                 print("Telegram error:", err)
 
     # export current report
-    report_df = pd.DataFrame(report)
-    # report_df.to_excel("report/report.xlsx", index=False)
+    report_df = pd.DataFrame({f"Report: {end}": report})
+    with pd.ExcelWriter("report/report.xlsx", engine="openpyxl") as writer:
+        report_df.to_excel(writer, sheet_name=end, index=False)
 
 
 if __name__ == "__main__":
