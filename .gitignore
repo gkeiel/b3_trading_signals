@@ -6,6 +6,3 @@ debug/*
 !debug/.gitkeep
 results/*
 !results/.gitkeep
-
-tickers_test.txt 
-indicators_test.txt 
