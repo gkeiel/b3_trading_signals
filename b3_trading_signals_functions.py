@@ -26,32 +26,34 @@ def load_indicators(filepath):
 def download_data(ticker, start, end):
     # collect OHLCVDS data from Yahoo Finance
     df = yf.download(ticker, start, end, auto_adjust=True)
-    df = df[["Close"]]
+    df.columns = df.columns.droplevel(1)    
+    df = df[["Close", "Volume"]]
     return df
 
 
-def run_strategy(df, ma_s, ma_l):
+def run_strategy(df, ma_s, ma_l, ma_v = 10):
     df = df.copy()
     
     # calculate indicators
     lab_ma_s = f"SMA{ma_s}"
     lab_ma_l = f"SMA{ma_l}"
+    lab_ma_v = "VMA"
     df[lab_ma_s] = df["Close"].rolling(window=ma_s).mean()      # short MA
     df[lab_ma_l] = df["Close"].rolling(window=ma_l).mean()      # long MA
-    
+    df[lab_ma_v] = df["Volume"].rolling(window=ma_v).mean()     # volume MA
+
     # generate buy/sell signals
     df["Signal"] = 0
     df.loc[df[lab_ma_s] > df[lab_ma_l], "Signal"] = 1           # buy signal  ->  1
     df.loc[df[lab_ma_s] < df[lab_ma_l], "Signal"] = -1          # sell signal -> -1
-    df["Signal_Strength"] = df["Signal"].groupby((df["Signal"] != df["Signal"].shift()).cumsum()).cumcount() +1  # consecutive samples (strength) with same signal
-    df.loc[df["Signal"] == 0, "Signal_Strength"] = 0            # strength is zero while there is no signal
-    
+    df["Signal_Length"] = df["Signal"].groupby((df["Signal"] != df["Signal"].shift()).cumsum()).cumcount() +1  # consecutive samples of same signal (signal length)
+    df.loc[df["Signal"] == 0, "Signal_Strength"] = 0                                                           # strength is zero while there is no signal
+    df["Volume_Strength"] = (df["Volume"] -df[lab_ma_v])/df[lab_ma_v]                                          # volume strenght
+
     # simulate execution (backtest)
     df["Position"] = df["Signal"].shift(1)                      # simulate position (using previous sample)
-    df.loc[df["Position"] == -1, "Position"] = 0                # comment if also desired selling operations
-    
+    df.loc[df["Position"] == -1, "Position"] = 0                # comment if also desired selling operations  
     df["Trade"] = df["Position"].diff().abs()                   # simulate trade
-    
     df["Return"] = df["Close"].pct_change()                     # asset percentage variation (in relation to previous sample)
     df["Strategy"] = df["Position"]*df["Return"]                # return of the strategy
     

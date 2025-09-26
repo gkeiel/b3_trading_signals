@@ -32,30 +32,30 @@ def main():
 
         # download and backtest
         df = tsf.download_data(ticker, start, end)
-        df = tsf.run_strategy(df[["Close"]], ma_s, ma_l)
+        df = tsf.run_strategy(df, ma_s, ma_l)
 
         # obtain last: price, signal, signal strength
         last_clo = df["Close"].iloc[-1]
         last_sig = df["Signal"].iloc[-1]
-        last_str = df["Signal_Strength"].iloc[-1]
+        last_str = df["Signal_Length"].iloc[-1]
+        last_vol = df["Volume_Strength"].iloc[-1]
         
         # store report
         alerts.append({
             "Ticker": ticker,
             "MA_S": ma_s,
             "MA_L": ma_l,
-            "Close": float(last_clo.iloc[0]),
+            "Close": float(last_clo),
             "Signal": int(last_sig),
-            "Signal_Strength": int(last_str)
+            "Signal_Length": int(last_str),
+            "Volume_Strength": float(last_vol)
         })
     
     for a in alerts:
-        s = a["Signal"]
-
-        if s != 0:       
+        if a["Signal"] != 0:       
             # trading signal message
-            verb = "⬆️ BUY" if s == 1 else "⬇️ SELL"
-            msg  = f"{a['Ticker']} | {verb} (SMA{a['MA_S']}/{a['MA_L']}) Strength {a['Signal_Strength']:d} | Price R${a['Close']:.2f}"
+            verb = "⬆️ BUY" if a["Signal"] == 1 else "⬇️ SELL"
+            msg  = f"{a['Ticker']} | {verb} (SMA{a['MA_S']}/{a['MA_L']}) Duration {a['Signal_Length']:d} | Volume Strength {a['Volume_Strength']:.2f} | Price R${a['Close']:.2f}"
             report.append(msg)
                 
             # notifies via Telegram

@@ -31,7 +31,7 @@ def main():
         df = raw_data[ticker]
 
         # run backtest
-        df = tsf.run_strategy(df[["Close"]], ma_s, ma_l)
+        df = tsf.run_strategy(df, ma_s, ma_l)
 
         if ticker not in res_data:
             res_data[ticker] = {}
@@ -83,7 +83,7 @@ def main():
         for ticker, ticker_results in res_data.items():
             ticker_results_df = pd.DataFrame.from_dict(ticker_results, orient="index")
             best_results_df   = tsf.best_strategy(ticker_results_df, w_return = 1, w_trades = 0.05).iloc[0]
-            f.write(f"{ticker},{best_results_df['MA_Short']},{best_results_df['MA_Long']}\n")
+            f.write(f"{ticker},{int(best_results_df['MA_Short'])},{int(best_results_df['MA_Long'])}\n")
 
 
 if __name__ == "__main__":
