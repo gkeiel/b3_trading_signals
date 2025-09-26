@@ -44,7 +44,9 @@ def main():
             "MA_Short": ma_s,
             "MA_Long": ma_l,
             "Return_Market": df["Cumulative_Market"].iloc[-1],
-            "Return_Strategy": df["Cumulative_Strategy"].iloc[-1]
+            "Return_Strategy": df["Cumulative_Strategy"].iloc[-1],
+            "Trades": df["Cumulative_Trades"].iloc[-1]//2,
+            "Score": 0
         }
         tsf.plot_res(df, ticker, ma_s, ma_l)
 
@@ -54,11 +56,34 @@ def main():
             for sheet_name, df in ticker_debug.items():
                 df.to_excel(writer, sheet_name=sheet_name[:15])
 
-    # export results (a spreadsheet for each ticker)
+    # export backtesting results (a spreadsheet for each ticker)
     with pd.ExcelWriter("results/results_backtest.xlsx", engine="openpyxl") as writer:
         for ticker, ticker_results in res_data.items():
+            # orient combinations to rows
             ticker_results_df = pd.DataFrame.from_dict(ticker_results, orient="index")
+
+            # export results
             ticker_results_df.to_excel(writer, sheet_name=ticker[:10], index=False)
+
+    # export best results (a spreadsheet for each ticker)
+    with pd.ExcelWriter("results/results_best.xlsx", engine="openpyxl") as writer:
+        for ticker, ticker_results in res_data.items():
+            # orient combinations to rows
+            ticker_results_df = pd.DataFrame.from_dict(ticker_results, orient="index")
+
+            # compute best strategy
+            best_results_df   = tsf.best_strategy(ticker_results_df, w_return = 1, w_trades = 0.01)
+
+            # export best results 
+            best_results_df.to_excel(writer, sheet_name=ticker[:10], index=False)
+
+    # update best results (for use in b3_trading_signals_bot)
+    with open("strategies.csv", "w") as f:
+        f.write("Ticker,MA_S,MA_L\n")
+        for ticker, ticker_results in res_data.items():
+            ticker_results_df = pd.DataFrame.from_dict(ticker_results, orient="index")
+            best_results_df   = tsf.best_strategy(ticker_results_df, w_return = 1, w_trades = 0.05).iloc[0]
+            f.write(f"{ticker},{best_results_df['MA_Short']},{best_results_df['MA_Long']}\n")
 
 
 if __name__ == "__main__":

@@ -43,18 +43,22 @@ def run_strategy(df, ma_s, ma_l):
     df["Signal"] = 0
     df.loc[df[lab_ma_s] > df[lab_ma_l], "Signal"] = 1           # buy signal  ->  1
     df.loc[df[lab_ma_s] < df[lab_ma_l], "Signal"] = -1          # sell signal -> -1
-    df["Signal_Strength"] = df["Signal"].groupby((df["Signal"] != df["Signal"].shift()).cumsum()).cumcount() +1  # consecutive samples with same signal
-    df.loc[df["Signal"] == 0, "Signal_Strength"] = 0            # but strength is zero while there is no signal
+    df["Signal_Strength"] = df["Signal"].groupby((df["Signal"] != df["Signal"].shift()).cumsum()).cumcount() +1  # consecutive samples (strength) with same signal
+    df.loc[df["Signal"] == 0, "Signal_Strength"] = 0            # strength is zero while there is no signal
     
     # simulate execution (backtest)
-    df["Position"] = df["Signal"].shift(1)                      # simulate position using signal from previous sample
+    df["Position"] = df["Signal"].shift(1)                      # simulate position (using previous sample)
     df.loc[df["Position"] == -1, "Position"] = 0                # comment if also desired selling operations
-    df["Return"] = df["Close"].pct_change()                     # asset percentage variation in relation to previous sample
+    
+    df["Trade"] = df["Position"].diff().abs()                   # simulate trade
+    
+    df["Return"] = df["Close"].pct_change()                     # asset percentage variation (in relation to previous sample)
     df["Strategy"] = df["Position"]*df["Return"]                # return of the strategy
     
     # compare buy & hold vs current strategy
     df["Cumulative_Market"] = (1 +df["Return"]).cumprod()       # cumulative return buy & hold strategy
     df["Cumulative_Strategy"] = (1 +df["Strategy"]).cumprod()   # cumulative return current strategy
+    df["Cumulative_Trades"] = df["Trade"].cumsum()              # cumulative number of trades
     return df
 
 
@@ -78,6 +82,14 @@ def plot_res(df, ticker, ma_s, ma_l):
     plt.grid(True)
     plt.savefig(f"results/{ticker}_backtest_{ma_s}_{ma_l}.png", dpi=300, bbox_inches="tight")
     plt.close()
+
+
+def best_strategy(df, w_return, w_trades):
+    df = df.copy()
+
+    df["Score"]     = w_return*df["Return_Strategy"] -w_trades*df["Trades"]
+    best_results_df = df.loc[df["Score"].nlargest(3).index].copy()
+    return best_results_df
 
 
 def send_telegram(msg):
