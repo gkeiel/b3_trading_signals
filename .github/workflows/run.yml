@@ -2,8 +2,8 @@ name: B3 trading signals bot
 
 on:
   schedule:
-    - cron: "0 20 * * *"  # run daily at 20:00 UTC = 17:00 Brasilia
-  workflow_dispatch:      # run manualy if desired
+    - cron: "15 20 * * 1-5" # runs at 20:15 UTC, Monday-Friday
+  workflow_dispatch:        # runs manualy if desired
 
 jobs:
   run-script:

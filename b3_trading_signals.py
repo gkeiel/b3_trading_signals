@@ -1,6 +1,5 @@
 import os
 import itertools
-import pandas as pd
 import b3_trading_signals_functions as tsf
 from datetime import datetime
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -50,40 +49,20 @@ def main():
         }
         tsf.plot_res(df, ticker, ma_s, ma_l)
 
-    # export dataframe for further analysis
-    for ticker, ticker_debug in pro_data.items():
-        with pd.ExcelWriter(f"debug/{ticker}.xlsx", engine="openpyxl") as writer:
-            for sheet_name, df in ticker_debug.items():
-                df.to_excel(writer, sheet_name=sheet_name[:15])
+    # compute best strategies (for each ticker)
+    bst_data = tsf.best_strategy(res_data, w_return = 1, w_trades = 0.01)
 
-    # export backtesting results (a spreadsheet for each ticker)
-    with pd.ExcelWriter("results/results_backtest.xlsx", engine="openpyxl") as writer:
-        for ticker, ticker_results in res_data.items():
-            # orient combinations to rows
-            ticker_results_df = pd.DataFrame.from_dict(ticker_results, orient="index")
+    # exports dataframe for analysis
+    tsf.export_dataframe(pro_data)
 
-            # export results
-            ticker_results_df.to_excel(writer, sheet_name=ticker[:10], index=False)
+    # exports backtesting results
+    tsf.export_results(res_data)
 
-    # export best results (a spreadsheet for each ticker)
-    with pd.ExcelWriter("results/results_best.xlsx", engine="openpyxl") as writer:
-        for ticker, ticker_results in res_data.items():
-            # orient combinations to rows
-            ticker_results_df = pd.DataFrame.from_dict(ticker_results, orient="index")
+    # exports sorted results by best
+    tsf.export_best_results(bst_data)
 
-            # compute best strategy
-            best_results_df   = tsf.best_strategy(ticker_results_df, w_return = 1, w_trades = 0.01)
-
-            # export best results 
-            best_results_df.to_excel(writer, sheet_name=ticker[:10], index=False)
-
-    # update best results (for use in b3_trading_signals_bot)
-    with open("strategies.csv", "w") as f:
-        f.write("Ticker,MA_S,MA_L\n")
-        for ticker, ticker_results in res_data.items():
-            ticker_results_df = pd.DataFrame.from_dict(ticker_results, orient="index")
-            best_results_df   = tsf.best_strategy(ticker_results_df, w_return = 1, w_trades = 0.05).iloc[0]
-            f.write(f"{ticker},{int(best_results_df['MA_Short'])},{int(best_results_df['MA_Long'])}\n")
+    # updates best strategies
+    tsf.update_best_results(bst_data)
 
 
 if __name__ == "__main__":

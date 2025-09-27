@@ -1,5 +1,6 @@
 import os
 import yfinance as yf
+import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib 
 import requests
@@ -86,12 +87,53 @@ def plot_res(df, ticker, ma_s, ma_l):
     plt.close()
 
 
-def best_strategy(df, w_return, w_trades):
-    df = df.copy()
+def export_dataframe(pro_data):
+    # export dataframe for further analysis
+    for ticker, ticker_debug in pro_data.items():
+        with pd.ExcelWriter(f"debug/{ticker}.xlsx", engine="openpyxl") as writer:
+            for sheet_name, df in ticker_debug.items():
+                # write to .xlsx
+                df.to_excel(writer, sheet_name=sheet_name[:15])
 
-    df["Score"]     = w_return*df["Return_Strategy"] -w_trades*df["Trades"]
-    best_results_df = df.loc[df["Score"].nlargest(3).index].copy()
-    return best_results_df
+
+def export_results(res_data):
+    # export backtesting results (a spreadsheet for each ticker)
+    with pd.ExcelWriter("results/results_backtest.xlsx", engine="openpyxl") as writer:
+        for ticker, ticker_results in res_data.items():
+            # orient combinations to rows
+            ticker_results_df = pd.DataFrame.from_dict(ticker_results, orient="index")
+
+            # write to .xlsx
+            ticker_results_df.to_excel(writer, sheet_name=ticker[:10], index=False)
+
+
+def export_best_results(bst_data):
+    # export best results (a spreadsheet for each ticker)
+    with pd.ExcelWriter("results/results_best.xlsx", engine="openpyxl") as writer:
+        for ticker, bst_df in bst_data.items():
+            # write to .xlsx 
+            bst_df.to_excel(writer, sheet_name=ticker[:10], index=False)
+
+
+def update_best_results(bst_data):
+    # update best results (for use in b3_trading_signals_bot)
+    with open("strategies.csv", "w") as f:
+        f.write("Ticker,MA_S,MA_L\n")
+        for ticker, bst_df in bst_data.items():
+            # write to .csv
+            row = bst_df.iloc[0]
+            f.write(f"{ticker},{int(row['MA_Short'])},{int(row['MA_Long'])}\n")
+
+
+def best_strategy(res_data, w_return, w_trades):
+    bst_data = {}
+
+    for ticker, ticker_results in res_data.items():
+        df = pd.DataFrame.from_dict(ticker_results, orient="index")
+        # define desired SCORE
+        df["Score"]      = w_return*df["Return_Strategy"] -w_trades*df["Trades"]
+        bst_data[ticker] = df.sort_values("Score", ascending=False).head(5)
+    return bst_data
 
 
 def send_telegram(msg):
