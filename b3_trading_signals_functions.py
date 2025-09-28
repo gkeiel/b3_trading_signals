@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib 
 import requests
 from dotenv import load_dotenv
+from google.cloud import storage
 matplotlib.use("Agg")
 
 
@@ -87,6 +88,12 @@ def plot_res(df, ticker, ma_s, ma_l):
     plt.close()
 
 
+def import_strategies(csv_file):
+    # import strategies
+    strategies = pd.read_csv(csv_file).set_index("Ticker").to_dict("index")
+    return strategies
+
+
 def export_dataframe(pro_data):
     # export dataframe for further analysis
     for ticker, ticker_debug in pro_data.items():
@@ -113,6 +120,13 @@ def export_best_results(bst_data):
         for ticker, bst_df in bst_data.items():
             # write to .xlsx 
             bst_df.to_excel(writer, sheet_name=ticker[:10], index=False)
+
+
+def export_report(report, end):
+    # export report to local
+    report_df = pd.DataFrame({f"Report: {end}": report})
+    with pd.ExcelWriter("report/report.xlsx", engine="openpyxl") as writer:
+        report_df.to_excel(writer, sheet_name=end, index=False)
 
 
 def update_best_results(bst_data):

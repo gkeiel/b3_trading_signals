@@ -58,7 +58,7 @@ def main():
     # exports backtesting results
     tsf.export_results(res_data)
 
-    # exports sorted results by best
+    # exports backtesting results sorted by best
     tsf.export_best_results(bst_data)
 
     # updates best strategies

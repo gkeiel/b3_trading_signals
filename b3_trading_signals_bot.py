@@ -1,23 +1,19 @@
 import os
-import pandas as pd
 import b3_trading_signals_functions as tsf
 from datetime import datetime
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-# import strategies in strategies.csv: tickers, indicators
-# from local folder
-csv_file   = "strategies.csv"
-# from url
-csv_file   = "https://drive.google.com/uc?export=download&id=1uwzEz3XullFI02U8QhsE3BCFGRliRZu2"
-
-strategies = pd.read_csv(csv_file).set_index("Ticker").to_dict("index")
+# import strategies from strategies.csv: tickers, indicators
+csv_file   = "strategies.csv"                                                                   # from local folder
+csv_file   = "https://drive.google.com/uc?export=download&id=1uwzEz3XullFI02U8QhsE3BCFGRliRZu2" # from cloud
+strategies = tsf.import_strategies(csv_file)
 tickers    = list(strategies.keys())
 
 
 def main():
     # define start and end time
-    start  = "2024-01-01"
+    start  = "2025-06-01"
     end    = datetime.now().strftime("%Y-%m-%d")
     alerts = []
     report = []
@@ -64,10 +60,8 @@ def main():
             except Exception as err:
                 print("Telegram error:", err)
 
-    # export current report
-    report_df = pd.DataFrame({f"Report: {end}": report})
-    with pd.ExcelWriter("report/report.xlsx", engine="openpyxl") as writer:
-        report_df.to_excel(writer, sheet_name=end, index=False)
+    # export report
+    tsf.export_report(report, end)
 
 
 if __name__ == "__main__":
