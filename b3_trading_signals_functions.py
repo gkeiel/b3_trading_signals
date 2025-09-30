@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import matplotlib 
 import requests
 from dotenv import load_dotenv
-from google.cloud import storage
 matplotlib.use("Agg")
 
 
@@ -20,8 +19,8 @@ def load_indicators(filepath):
     with open(filepath, "r", encoding="utf-8") as f:
         for line in f:
             if line.strip():
-                s, l = line.strip().split(",")
-                indicators.append((int(s), int(l)))
+                t, s, l = line.strip().split(",")
+                indicators.append((t, int(s), int(l)))
     return indicators
 
 
@@ -33,24 +32,52 @@ def download_data(ticker, start, end):
     return df
 
 
-def run_strategy(df, ma_s, ma_l, ma_v = 10):
+def sma(series:pd.Series, short:int, long:int) -> tuple[pd.Series, pd.Series]:
+    # simple moving average (SMA)
+    return (series.rolling(window=short).mean(),
+            series.rolling(window=long).mean())
+
+
+def wma(series:pd.Series, short:int, long:int) -> tuple[pd.Series, pd.Series]:
+    # weighted moving average (WMA)
+    w_s = pd.Series(range(1, short+1), dtype=float)
+    w_l = pd.Series(range(1, long+1), dtype=float)
+    series_s = series.rolling(window=short).apply(lambda x: (x*w_s).sum()/w_s.sum(), raw=True)
+    series_l = series.rolling(window=long).apply(lambda x: (x*w_l).sum()/w_l.sum(), raw=True)
+    return (series_s, series_l)
+
+
+def ema(series:pd.Series, short:int, long:int) -> tuple[pd.Series, pd.Series]:
+    # exponential moving average (EMA)
+    return (series.ewm(span=short, adjust=False).mean(),
+            series.ewm(span=long, adjust=False).mean())
+
+
+def setup_indicators(df, label):
+    ticker, ind_t, ind_s, ind_l = label.split("_")
+
+    if ind_t == "SMA":
+        df["Short"], df["Long"] = sma( df["Close"], int(ind_s), int(ind_l))
+    elif ind_t == "EMA":
+        df["Short"], df["Long"] = ema( df["Close"], int(ind_s), int(ind_l))
+    elif ind_t == "WMA":
+        df["Short"], df["Long"] = wma( df["Close"], int(ind_s), int(ind_l))
+    return df
+
+
+def run_strategy(df, ma_v = 10):
     df = df.copy()
     
-    # calculate indicators
-    lab_ma_s = f"SMA{ma_s}"
-    lab_ma_l = f"SMA{ma_l}"
-    lab_ma_v = "VMA"
-    df[lab_ma_s] = df["Close"].rolling(window=ma_s).mean()      # short MA
-    df[lab_ma_l] = df["Close"].rolling(window=ma_l).mean()      # long MA
-    df[lab_ma_v] = df["Volume"].rolling(window=ma_v).mean()     # volume MA
+    # calculate volume MA
+    df["VMA"] = df["Volume"].rolling(window=ma_v).mean()        # volume MA
 
     # generate buy/sell signals
     df["Signal"] = 0
-    df.loc[df[lab_ma_s] > df[lab_ma_l], "Signal"] = 1           # buy signal  ->  1
-    df.loc[df[lab_ma_s] < df[lab_ma_l], "Signal"] = -1          # sell signal -> -1
-    df["Signal_Length"] = df["Signal"].groupby((df["Signal"] != df["Signal"].shift()).cumsum()).cumcount() +1  # consecutive samples of same signal (signal length)
-    df.loc[df["Signal"] == 0, "Signal_Strength"] = 0                                                           # strength is zero while there is no signal
-    df["Volume_Strength"] = (df["Volume"] -df[lab_ma_v])/df[lab_ma_v]                                          # volume strenght
+    df.loc[df["Short"] > df["Long"], "Signal"] = 1              # buy signal  ->  1
+    df.loc[df["Short"] < df["Long"], "Signal"] = -1             # sell signal -> -1
+    df["Signal_Length"] = df["Signal"].groupby((df["Signal"] != df["Signal"].shift()).cumsum()).cumcount() +1   # consecutive samples of same signal (signal length)
+    df.loc[df["Signal"] == 0, "Signal_Strength"] = 0                                                            # strength is zero while there is no signal
+    df["Volume_Strength"] = (df["Volume"] -df["VMA"])/df["VMA"]                                                 # volume strenght
 
     # simulate execution (backtest)
     df["Position"] = df["Signal"].shift(1)                      # simulate position (using previous sample)
@@ -66,25 +93,27 @@ def run_strategy(df, ma_s, ma_l, ma_v = 10):
     return df
 
 
-def plot_res(df, ticker, ma_s, ma_l):
+def plot_res(df, label):
+    ticker, ind_t, ind_s, ind_l = label.split("_")
+
     # save results
     plt.figure(figsize=(12,6))
     plt.plot(df.index, df["Close"], label=f"{ticker}")
-    plt.plot(df.index, df[f"SMA{ma_s}"], label=f"SMA{ma_s}")
-    plt.plot(df.index, df[f"SMA{ma_l}"], label=f"SMA{ma_l}")
+    plt.plot(df.index, df[f"Short"], label=f"{ind_t}{ind_s}")
+    plt.plot(df.index, df[f"Long"], label=f"{ind_t}{ind_l}")
     plt.title(f"{ticker} - Price")
     plt.legend()
     plt.grid(True)
-    plt.savefig(f"results/{ticker}_{ma_s}_{ma_l}.png", dpi=300, bbox_inches="tight")
+    plt.savefig(f"results/{label}.png", dpi=300, bbox_inches="tight")
     plt.close()
 
     plt.figure(figsize=(12,6))
     plt.plot(df.index, df["Cumulative_Market"], label="Buy & Hold")
     plt.plot(df.index, df["Cumulative_Strategy"], label="Strategy")
-    plt.title(f"{ticker} - Backtest SMA{ma_s}/{ma_l}")
+    plt.title(f"{ticker} - Backtest {ind_t}{ind_s}/{ind_l}")
     plt.legend()
     plt.grid(True)
-    plt.savefig(f"results/{ticker}_backtest_{ma_s}_{ma_l}.png", dpi=300, bbox_inches="tight")
+    plt.savefig(f"results/backtest_{label}.png", dpi=300, bbox_inches="tight")
     plt.close()
 
 
@@ -100,7 +129,7 @@ def export_dataframe(pro_data):
         with pd.ExcelWriter(f"debug/{ticker}.xlsx", engine="openpyxl") as writer:
             for sheet_name, df in ticker_debug.items():
                 # write to .xlsx
-                df.to_excel(writer, sheet_name=sheet_name[:15])
+                df.to_excel(writer, sheet_name=sheet_name[:20])
 
 
 def export_results(res_data):
@@ -132,11 +161,11 @@ def export_report(report, end):
 def update_best_results(bst_data):
     # update best results (for use in b3_trading_signals_bot)
     with open("strategies.csv", "w") as f:
-        f.write("Ticker,MA_S,MA_L\n")
+        f.write("Ticker,Indicator,Short,Long\n")
         for ticker, bst_df in bst_data.items():
             # write to .csv
             row = bst_df.iloc[0]
-            f.write(f"{ticker},{int(row['MA_Short'])},{int(row['MA_Long'])}\n")
+            f.write(f"{ticker},{row['Indicator']},{int(row['MA_Short'])},{int(row['MA_Long'])}\n")
 
 
 def best_strategy(res_data, w_return, w_trades):
@@ -146,7 +175,7 @@ def best_strategy(res_data, w_return, w_trades):
         df = pd.DataFrame.from_dict(ticker_results, orient="index")
         # define desired SCORE
         df["Score"]      = w_return*df["Return_Strategy"] -w_trades*df["Trades"]
-        bst_data[ticker] = df.sort_values("Score", ascending=False).head(5)
+        bst_data[ticker] = df.sort_values("Score", ascending=False)
     return bst_data
 
 

@@ -22,32 +22,37 @@ def main():
     indicators = tsf.load_indicators("indicators.txt")
 
     # download data and run backtest (for each ticker and strategy)
-    for ticker, (ma_s, ma_l) in itertools.product(tickers, indicators):
+    for ticker, (ind_t, ind_s, ind_l) in itertools.product(tickers, indicators):
+
+        label = f"{ticker}_{ind_t}_{ind_s}_{ind_l}"
 
         # download data (only once)
         if ticker not in raw_data:
             raw_data[ticker] = tsf.download_data(ticker, start, end)
         df = raw_data[ticker]
 
+        # setup indicators
+        df = tsf.setup_indicators(df, label)
+
         # run backtest
-        df = tsf.run_strategy(df, ma_s, ma_l)
+        df = tsf.run_strategy(df)
 
         if ticker not in res_data:
             res_data[ticker] = {}
             pro_data[ticker] = {}
 
         # store processed data and result data
-        label = f"{ticker}_{ma_s}_{ma_l}"
         pro_data[ticker][label] = df.copy()
         res_data[ticker][label] = {
-            "MA_Short": ma_s,
-            "MA_Long": ma_l,
+            "Indicator": ind_t,
+            "MA_Short": ind_s,
+            "MA_Long": ind_l,
             "Return_Market": df["Cumulative_Market"].iloc[-1],
             "Return_Strategy": df["Cumulative_Strategy"].iloc[-1],
             "Trades": df["Cumulative_Trades"].iloc[-1]//2,
             "Score": 0
         }
-        tsf.plot_res(df, ticker, ma_s, ma_l)
+        tsf.plot_res(df, label)
 
     # compute best strategies (for each ticker)
     bst_data = tsf.best_strategy(res_data, w_return = 1, w_trades = 0.01)
