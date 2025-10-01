@@ -22,17 +22,19 @@ def main():
     indicators = tsf.load_indicators("indicators.txt")
 
     # download data and run backtest (for each ticker and strategy)
-    for ticker, (ind_t, ind_s, ind_l) in itertools.product(tickers, indicators):
+    for ticker, indicator in itertools.product(tickers, indicators):
 
-        label = f"{ticker}_{ind_t}_{ind_s}_{ind_l}"
+        # extract from indicator
+        ind_t = indicator["ind_t"]  # indicator title
+        ind_p = indicator["ind_p"]  # indicator parameters
 
         # download data (only once)
         if ticker not in raw_data:
             raw_data[ticker] = tsf.download_data(ticker, start, end)
         df = raw_data[ticker]
 
-        # setup indicators
-        df = tsf.setup_indicators(df, label)
+        # setup indicator
+        df = tsf.setup_indicator(df, indicator)
 
         # run backtest
         df = tsf.run_strategy(df)
@@ -42,11 +44,12 @@ def main():
             pro_data[ticker] = {}
 
         # store processed data and result data
+        params = "_".join(str(p) for p in ind_p)
+        label  = f"{ticker}_{ind_t}_{params}"
         pro_data[ticker][label] = df.copy()
         res_data[ticker][label] = {
             "Indicator": ind_t,
-            "MA_Short": ind_s,
-            "MA_Long": ind_l,
+            "Parameters": ind_p,
             "Return_Market": df["Cumulative_Market"].iloc[-1],
             "Return_Strategy": df["Cumulative_Strategy"].iloc[-1],
             "Trades": df["Cumulative_Trades"].iloc[-1]//2,

@@ -19,8 +19,10 @@ def load_indicators(filepath):
     with open(filepath, "r", encoding="utf-8") as f:
         for line in f:
             if line.strip():
-                t, s, l = line.strip().split(",")
-                indicators.append((t, int(s), int(l)))
+                parts = [p.strip() for p in line.split(",") if p.strip()]
+                ind_t = parts[0]                    # indicator title
+                ind_p = [int(x) for x in parts[1:]] # indicator parameters
+                indicators.append({"ind_t":ind_t, "ind_p":ind_p})
     return indicators
 
 
@@ -32,36 +34,52 @@ def download_data(ticker, start, end):
     return df
 
 
-def sma(series:pd.Series, short:int, long:int) -> tuple[pd.Series, pd.Series]:
+def sma(series:pd.Series, window:int) -> pd.Series:
     # simple moving average (SMA)
-    return (series.rolling(window=short).mean(),
-            series.rolling(window=long).mean())
+    return series.rolling(window=window).mean()
 
 
-def wma(series:pd.Series, short:int, long:int) -> tuple[pd.Series, pd.Series]:
+def wma(series:pd.Series, window:int) -> pd.Series:
     # weighted moving average (WMA)
-    w_s = pd.Series(range(1, short+1), dtype=float)
-    w_l = pd.Series(range(1, long+1), dtype=float)
-    series_s = series.rolling(window=short).apply(lambda x: (x*w_s).sum()/w_s.sum(), raw=True)
-    series_l = series.rolling(window=long).apply(lambda x: (x*w_l).sum()/w_l.sum(), raw=True)
-    return (series_s, series_l)
+    w      = pd.Series(range(1, window+1), dtype=float)
+    return series.rolling(window=window).apply(lambda x: (x*w).sum()/w.sum(), raw=True)
 
 
-def ema(series:pd.Series, short:int, long:int) -> tuple[pd.Series, pd.Series]:
+def ema(series:pd.Series, window:int) -> pd.Series:
     # exponential moving average (EMA)
-    return (series.ewm(span=short, adjust=False).mean(),
-            series.ewm(span=long, adjust=False).mean())
+    return series.ewm(span=window, adjust=False).mean()
 
 
-def setup_indicators(df, label):
-    ticker, ind_t, ind_s, ind_l = label.split("_")
+def setup_indicator(df, indicator):
+    """
+    parameters:
+    - df: dataframe with column 'Close'
+    - indicator: dictionary with
+        - ind_t: str with indicator name ("SMA", "WMA", "EMA")
+        - ind_p: list with indicator values (10, 20)
 
-    if ind_t == "SMA":
-        df["Short"], df["Long"] = sma( df["Close"], int(ind_s), int(ind_l))
-    elif ind_t == "EMA":
-        df["Short"], df["Long"] = ema( df["Close"], int(ind_s), int(ind_l))
-    elif ind_t == "WMA":
-        df["Short"], df["Long"] = wma( df["Close"], int(ind_s), int(ind_l))
+    """
+    ind_t  = indicator.get("ind_t", "")
+    params = indicator.get("ind_p", [])
+
+    # function mapping
+    ma_fn  = {"SMA": sma, "EMA": ema, "WMA": wma}[ind_t]
+
+    if ind_t in ["SMA", "WMA", "EMA"]:
+        # 2 MAs crossover
+        if len(params) == 2:
+            short, long = params
+            df["Short"] = ma_fn( df["Close"], short)
+            df["Long"]  = ma_fn( df["Close"], long)
+
+        # 3 MAs crossover
+        elif len(params) == 3:
+            short, medium, long = params
+            df["Short"]  = ma_fn( df["Close"], short)
+            df["Medium"] = ma_fn( df["Close"], medium)
+            df["Long"]   = ma_fn( df["Close"], long)
+        else:
+            raise ValueError(f"{ind_t} requires 2 or 3 periods, but received {len(params)}.")
     return df
 
 
@@ -94,13 +112,15 @@ def run_strategy(df, ma_v = 10):
 
 
 def plot_res(df, label):
-    ticker, ind_t, ind_s, ind_l = label.split("_")
+    ticker, ind_t, *params = label.split("_")
 
     # save results
     plt.figure(figsize=(12,6))
     plt.plot(df.index, df["Close"], label=f"{ticker}")
-    plt.plot(df.index, df[f"Short"], label=f"{ind_t}{ind_s}")
-    plt.plot(df.index, df[f"Long"], label=f"{ind_t}{ind_l}")
+    for p in params:
+        col = f"{ind_t}_{p}"
+        if col in df.columns:
+            plt.plot(df.index, df[col], label=f"{ind_t}{p}")
     plt.title(f"{ticker} - Price")
     plt.legend()
     plt.grid(True)
@@ -110,7 +130,7 @@ def plot_res(df, label):
     plt.figure(figsize=(12,6))
     plt.plot(df.index, df["Cumulative_Market"], label="Buy & Hold")
     plt.plot(df.index, df["Cumulative_Strategy"], label="Strategy")
-    plt.title(f"{ticker} - Backtest {ind_t}{ind_s}/{ind_l}")
+    plt.title(f"{ticker} - Backtest {ind_t}{'/'.join(params)}")
     plt.legend()
     plt.grid(True)
     plt.savefig(f"results/backtest_{label}.png", dpi=300, bbox_inches="tight")
@@ -161,11 +181,12 @@ def export_report(report, end):
 def update_best_results(bst_data):
     # update best results (for use in b3_trading_signals_bot)
     with open("strategies.csv", "w") as f:
-        f.write("Ticker,Indicator,Short,Long\n")
+        f.write("Ticker,Indicator,Parameters\n")
         for ticker, bst_df in bst_data.items():
             # write to .csv
-            row = bst_df.iloc[0]
-            f.write(f"{ticker},{row['Indicator']},{int(row['MA_Short'])},{int(row['MA_Long'])}\n")
+            row    = bst_df.iloc[0]
+            params = "-".join(str(p) for p in row["Parameters"])
+            f.write(f"{ticker},{row['Indicator']},{params}\n")
 
 
 def best_strategy(res_data, w_return, w_trades):
