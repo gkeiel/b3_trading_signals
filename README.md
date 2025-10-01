@@ -1,13 +1,13 @@
 # Sinais de negociação B3
 
-Este projeto oferece um script Python para geração de sinais de compra e venda recorrentes para a Bolsa de Valores Brasileira (B3), aplicando o cruzamento de médias móveis simples (SMA) de curto e longo prazo em séries temporais de ativos do mercado à vista. Adicionalemnte, em script complementar, oferece uma automatização para seleção das estratégias com melhor performance.
+Este projeto oferece um script Python para geração automática de sinais de compra e venda recorrentes para a Bolsa de Valores Brasileira (B3), aplicando estratégias de cruzamento de médias móveis em séries temporais de ativos do mercado à vista. Adicionalmente, em script complementar, oferece uma automatização para seleção das estratégias com melhor performance.
 
 ## 📊 Funcionalidades
 
 - **Download de dados**: Realiza o download de dados de mercado pela API Yahoo Finance.
-- **Cálculo de médias móveis**: Implementa estratégias SMA de curto e longo prazo para identificar tendências.
+- **Cálculo de médias móveis**: Implementa estratégias de cruzamento de SMA, WMA ou EMA para identificar possíveis tendências.
 - ***Backtesting* das estratégias**: Realiza teste das estratégias com dados históricos, gerando figuras e resumo para tomada de decisão.
-- **Avaliação de performance**: Avalia desempenho frente a uma função de ponderação para selecionar as melhores estratégias.
+- **Avaliação de performance**: Avalia desempenho frente a uma função de ponderação e classifica as melhores estratégias.
 - **Notificações via Telegram**: Envia sinais de negociação provenientes da estratégia escolhida diretamente para o *smartphone*/computador.
 - **Agendamento automático**: Configura tarefa para execução diária no GitHub Actions ou então pelo Agendador de Tarefas do Windows.
 - **Arquivos de configuração**: Utiliza `.env` para variáveis de ambiente privadas, `.txt` para lista de códigos, `.txt`para lista de indicadores e `.csv` para lista de estratégias.
@@ -25,7 +25,7 @@ Este projeto oferece um script Python para geração de sinais de compra e venda
 
 2. **Configurar códigos e indicadores**
    - Em `tickers.txt` adicione os códigos das ações que deseja avaliar, um por linha.
-   - Em `indicators.txt` adicione os indicadores que deseja gerar, um por linha. Inicialmente apenas SMA são implementáveis.
+   - Em `indicators.txt` adicione os indicadores que deseja gerar, um por linha. Inicialmente apenas SMA, WMA e EMA são implementáveis.
    - Em `strategies.csv` adicione os códigos das ações que deseja gerar sinais de negociação, cada qual com a respectiva melhor estratégia.
 
 3. **Configurar Telegram**
@@ -75,7 +75,7 @@ Este projeto oferece um script Python para geração de sinais de compra e venda
 - `b3_trading_signals_functions.py` → Funções auxiliares reutilizáveis.
 - `b3_trading_signals_task_scheduler.py` → Criação de execução agendada no Windows.
 - `tickers.txt` → Lista de *tickers* para análise.
-- `indicators.txt` → Lista de indicadores SMA para análise.
+- `indicators.txt` → Lista de indicadores para análise.
 - `strategies.csv` → Lista de estratégias para sinais de negociação consistindo de *tickers* e seus indicadores.
 
 ## 📌 Observações

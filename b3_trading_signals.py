@@ -24,10 +24,6 @@ def main():
     # download data and run backtest (for each ticker and strategy)
     for ticker, indicator in itertools.product(tickers, indicators):
 
-        # extract from indicator
-        ind_t = indicator["ind_t"]  # indicator title
-        ind_p = indicator["ind_p"]  # indicator parameters
-
         # download data (only once)
         if ticker not in raw_data:
             raw_data[ticker] = tsf.download_data(ticker, start, end)
@@ -44,8 +40,11 @@ def main():
             pro_data[ticker] = {}
 
         # store processed data and result data
+        ind_t  = indicator["ind_t"]  # indicator title
+        ind_p  = indicator["ind_p"]  # indicator parameters
         params = "_".join(str(p) for p in ind_p)
         label  = f"{ticker}_{ind_t}_{params}"
+        
         pro_data[ticker][label] = df.copy()
         res_data[ticker][label] = {
             "Indicator": ind_t,

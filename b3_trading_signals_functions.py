@@ -185,7 +185,7 @@ def update_best_results(bst_data):
         for ticker, bst_df in bst_data.items():
             # write to .csv
             row    = bst_df.iloc[0]
-            params = "-".join(str(p) for p in row["Parameters"])
+            params = "_".join(str(p) for p in row["Parameters"])
             f.write(f"{ticker},{row['Indicator']},{params}\n")
 
 
