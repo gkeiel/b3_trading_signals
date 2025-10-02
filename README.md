@@ -1,11 +1,11 @@
 # Sinais de negociação B3
 
-Este projeto oferece um script Python para geração automática de sinais de compra e venda recorrentes para a Bolsa de Valores Brasileira (B3), aplicando estratégias de cruzamento de médias móveis em séries temporais de ativos do mercado à vista. Adicionalmente, em script complementar, oferece uma automatização para seleção das estratégias com melhor performance.
+Este projeto oferece um script Python para geração automática de sinais de compra e venda recorrentes para a Bolsa de Valores Brasileira (B3), aplicando estratégias de cruzamento de médias móveis duplo ou triplo em séries temporais de ativos do mercado à vista. Adicionalmente, oferece um script complementar para ensaio e seleção das estratégias com melhor performance.
 
 ## 📊 Funcionalidades
 
 - **Download de dados**: Realiza o download de dados de mercado pela API Yahoo Finance.
-- **Cálculo de médias móveis**: Implementa estratégias de cruzamento de SMA, WMA ou EMA para identificar possíveis tendências.
+- **Cruzamento de médias móveis**: Implementa estratégias de cruzamento de 2 ou 3 médias móveis SMA, WMA ou EMA para identificar possíveis tendências.
 - ***Backtesting* das estratégias**: Realiza teste das estratégias com dados históricos, gerando figuras e resumo para tomada de decisão.
 - **Avaliação de performance**: Avalia desempenho frente a uma função de ponderação e classifica as melhores estratégias.
 - **Notificações via Telegram**: Envia sinais de negociação provenientes da estratégia escolhida diretamente para o *smartphone*/computador.

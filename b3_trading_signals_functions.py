@@ -75,24 +75,29 @@ def setup_indicator(df, indicator):
         # 3 MAs crossover
         elif len(params) == 3:
             short, medium, long = params
-            df["Short"]  = ma_fn( df["Close"], short)
-            df["Medium"] = ma_fn( df["Close"], medium)
-            df["Long"]   = ma_fn( df["Close"], long)
+            df["Short"] = ma_fn( df["Close"], short)
+            df["Med"]   = ma_fn( df["Close"], medium)
+            df["Long"]  = ma_fn( df["Close"], long)
         else:
             raise ValueError(f"{ind_t} requires 2 or 3 periods, but received {len(params)}.")
     return df
 
 
-def run_strategy(df, ma_v = 10):
-    df = df.copy()
+def run_strategy(df, indicator, ma_v = 10):
+    ind_t  = indicator["ind_t"]
+    params = indicator["ind_p"]   
     
     # calculate volume MA
     df["VMA"] = df["Volume"].rolling(window=ma_v).mean()        # volume MA
 
     # generate buy/sell signals
     df["Signal"] = 0
-    df.loc[df["Short"] > df["Long"], "Signal"] = 1              # buy signal  ->  1
-    df.loc[df["Short"] < df["Long"], "Signal"] = -1             # sell signal -> -1
+    if len(params) == 2:
+        df.loc[df["Short"] > df["Long"], "Signal"] = 1          # buy signal  ->  1
+        df.loc[df["Short"] < df["Long"], "Signal"] = -1         # sell signal -> -1
+    elif len(params) == 3:
+        df.loc[(df["Short"] > df["Med"]) & (df["Med"] > df["Long"]), "Signal"] = 1                              # buy signal  ->  1
+        df.loc[(df["Short"] < df["Med"]) & (df["Med"] < df["Long"]), "Signal"] = -1                             # sell signal -> -1
     df["Signal_Length"] = df["Signal"].groupby((df["Signal"] != df["Signal"].shift()).cumsum()).cumcount() +1   # consecutive samples of same signal (signal length)
     df.loc[df["Signal"] == 0, "Signal_Strength"] = 0                                                            # strength is zero while there is no signal
     df["Volume_Strength"] = (df["Volume"] -df["VMA"])/df["VMA"]                                                 # volume strenght
@@ -117,10 +122,12 @@ def plot_res(df, label):
     # save results
     plt.figure(figsize=(12,6))
     plt.plot(df.index, df["Close"], label=f"{ticker}")
-    for p in params:
-        col = f"{ind_t}_{p}"
-        if col in df.columns:
-            plt.plot(df.index, df[col], label=f"{ind_t}{p}")
+    if "Short" in df and len(params) >= 1:
+        plt.plot(df.index, df["Short"],  label=f"{ind_t}{params[0]}")
+    if "Med" in df and len(params) >= 2:
+        plt.plot(df.index, df["Med"], label=f"{ind_t}{params[1]}")
+    if "Long" in df and len(params) >= 3:
+        plt.plot(df.index, df["Long"],   label=f"{ind_t}{params[2]}")
     plt.title(f"{ticker} - Price")
     plt.legend()
     plt.grid(True)
@@ -133,7 +140,7 @@ def plot_res(df, label):
     plt.title(f"{ticker} - Backtest {ind_t}{'/'.join(params)}")
     plt.legend()
     plt.grid(True)
-    plt.savefig(f"results/backtest_{label}.png", dpi=300, bbox_inches="tight")
+    plt.savefig(f"results/{label}_backtest.png", dpi=300, bbox_inches="tight")
     plt.close()
 
 

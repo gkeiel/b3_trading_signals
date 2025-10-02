@@ -33,7 +33,7 @@ def main():
         df = tsf.setup_indicator(df, indicator)
 
         # run backtest
-        df = tsf.run_strategy(df)
+        df = tsf.run_strategy(df, indicator)
 
         if ticker not in res_data:
             res_data[ticker] = {}

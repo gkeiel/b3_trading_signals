@@ -31,7 +31,7 @@ def main():
         # download and backtest
         df = tsf.download_data(ticker, start, end)
         df = tsf.setup_indicator(df, indicator)
-        df = tsf.run_strategy(df)
+        df = tsf.run_strategy(df, indicator)
 
         # obtain last: price, signal, signal strength
         last_clo = df["Close"].iloc[-1]
@@ -51,17 +51,19 @@ def main():
         })
     
     for a in alerts:
+        # trading signal message
         if a["Signal"] != 0:       
-            # trading signal message
             verb = "⬆️ BUY" if a["Signal"] == 1 else "⬇️ SELL"
-            msg  = f"{a['Ticker']} | {verb} ({a['Indicator']}{'/'.join(a['Parameters'])}) Duration {a['Signal_Length']:d} | Volume Strength {a['Volume_Strength']:.2f} | Price R${a['Close']:.2f}"
-            report.append(msg)
-                
-            # notifies via Telegram
-            try:
-                tsf.send_telegram(msg)
-            except Exception as err:
-                print("Telegram error:", err)
+        else:
+            verb = "⏸️ NEUTRAL"
+        msg  = f"{a['Ticker']} | {verb} ({a['Indicator']}{'/'.join(a['Parameters'])}) Duration {a['Signal_Length']:d} | Volume Strength {a['Volume_Strength']:.2f} | Price R${a['Close']:.2f}"
+        report.append(msg)
+
+        # notifies via Telegram
+        try:
+            tsf.send_telegram(msg)
+        except Exception as err:
+            print("Telegram error:", err)
 
     # export report
     tsf.export_report(report, end)
