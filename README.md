@@ -1,6 +1,10 @@
 # Sinais de negociação B3
 
-Este projeto oferece um script Python para geração automática de sinais de compra e venda recorrentes para a Bolsa de Valores Brasileira (B3), aplicando estratégias de cruzamento de médias móveis duplo ou triplo em séries temporais de ativos do mercado à vista. Adicionalmente, oferece um script complementar para ensaio e seleção das estratégias com melhor performance.
+Este projeto disponibiliza um script Python para **geração automática de sinais de compra e venda de ativos da B3 (Bolsa de Valores Brasileira)**, aplicando estratégias de cruzamento de médias móveis em séries temporais do mercado à vista. Inclui um script para ***backtesting* e seleção das estratégias com melhor desempenho**, permitindo avaliar as abordagens antes de aplicá-las.
+
+Como principais vantagens, o projeto proporciona:
+- envio de sinais **via mensagem** e **sem a necessidade de análise gráfica**.
+- **código aberto** permitindo **flexibilidade para escolha das médias móveis** e comparação entre estratégias. 
 
 ## 📊 Funcionalidades
 
@@ -11,6 +15,15 @@ Este projeto oferece um script Python para geração automática de sinais de co
 - **Notificações via Telegram**: Envia sinais de negociação provenientes da estratégia escolhida diretamente para o *smartphone*/computador.
 - **Agendamento automático**: Configura tarefa para execução diária no GitHub Actions ou então pelo Agendador de Tarefas do Windows.
 - **Arquivos de configuração**: Utiliza `.env` para variáveis de ambiente privadas, `.txt` para lista de códigos, `.txt`para lista de indicadores e `.csv` para lista de estratégias.
+
+## 📈 Estratégias Disponíveis
+
+O projeto atualmente suporta as estratégias de **cruzamento duplo** e **cruzamento triplo** de médias móveis para geração de sinais de negociação, usando os seguintes métodos de cálculo:
+- **SMA (Simple Moving Average)** - Média móvel simples.
+- **EMA (Exponential Moving Average)** - Média móvel exponencial.
+- **WMA (Weighted Moving Average)** – Média móvel ponderada.
+
+Essas opções permitem que o usuário compare o desempenho de diferentes abordagens dentro da B3.
 
 ## ⚙️ Como Usar
 
@@ -45,6 +58,7 @@ Este projeto oferece um script Python para geração automática de sinais de co
      ```bash
      python b3_trading_signals_task_scheduler.py
      ```
+
 ## 🖼️ Exemplos de saídas
 
 - **Gráfico do *backtest* com SMA**
@@ -66,7 +80,7 @@ Este projeto oferece um script Python para geração automática de sinais de co
   <img width="480" height="511" alt="telegram" src="https://github.com/user-attachments/assets/84a83c60-ac94-4759-bddf-b9708b5199f2" />
   </p>
 
-  Note como é gerado um sinal de negociação para cada ativo, sugerindo a tendência de alta ou baixa baseado na estratégia definida e o acumulado dessa tendência, que mostra a quantas amostras a tendência permanece sem trocar de lado. 
+  Note como é gerado um sinal de negociação para cada ativo, sugerindo a tendência de alta ou baixa baseado na estratégia definida e o acumulado dessa tendência, que mostra a quantas amostras a tendência permanece sem trocar de lado.
 
 ## 🧩 Estrutura do Projeto
 
@@ -80,18 +94,19 @@ Este projeto oferece um script Python para geração automática de sinais de co
 
 ## 📌 Observações
 
-- O projeto está em desenvolvimento ocasional apenas durante horário de lazer e poderá sofrer alterações.
 - Novos indicadores e funcionalidades poderão ser incorporados no futuro.
 - Contribuições são bem-vindas! Abra uma *issue* ou envie um *pull request*.
 - Sanando possíveis dúvidas:
   - API Yahoo Finance: latência de 15 minutos para dados intradiários, sem limite de requisições;
   - API Brapi em seu plano gratuito: latência de 30 minutos, limite mensal de 15000 requisições;
   - Outras APIs: latências similares e/ou envolvem custo.
+  Para projetos avançados e personalizados, entrar em contato com o desenvolvedor.
 
-## 🤝 Contato
 
-- Para projetos avançados e personalizados, entrar em contato com o desenvolvedor.
-- Sobre as qualificações do referido profissional:
-  - A quantidade de desenvolvedores, por vezes mais habilidosos, disponíveis no mercado é enorme;
-  - A quantidade de desenvolvedores que entendem de mercado financeiro e análise de séries financeiras é razoável;
-  - A quantidade de desenvolvedores que entendem de análise de séries financeiras e teoria de análise/controle de sistemas (filtragem, estimação, análise frequencial) é mínima.
+## 🤝 Apoie o projeto
+
+Este repositório é mantido de forma independente, durante o tempo livre. Se o código lhe foi útil e deseja apoiar o desenvolvimento contínuo, considere fazer uma doação:
+
+- [PayPal](https://www.paypal.com/donate/?hosted_button_id=BF6E8J7P32KWE)  
+
+Seu apoio ajuda a manter e evoluir este projeto, adicionando novos indicadores, melhorias e documentação.

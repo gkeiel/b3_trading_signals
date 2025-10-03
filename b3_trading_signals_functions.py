@@ -26,6 +26,17 @@ def load_indicators(filepath):
     return indicators
 
 
+def load_confirmations():
+    return [
+        {"ind_t": "SMA", "ind_p": [5]},
+        {"ind_t": "SMA", "ind_p": [10]},
+        {"ind_t": "SMA", "ind_p": [20]},
+        {"ind_t": "SMA", "ind_p": [50]},
+        {"ind_t": "SMA", "ind_p": [100]},
+        {"ind_t": "SMA", "ind_p": [200]},
+    ]
+
+
 def download_data(ticker, start, end):
     # collect OHLCVDS data from Yahoo Finance
     df = yf.download(ticker, start, end, auto_adjust=True)
@@ -66,20 +77,23 @@ def setup_indicator(df, indicator):
     ma_fn  = {"SMA": sma, "EMA": ema, "WMA": wma}[ind_t]
 
     if ind_t in ["SMA", "WMA", "EMA"]:
-        # 2 MAs crossover
-        if len(params) == 2:
+        # 1 MA
+        if len(params) == 1:
+            short = params[0]
+            df["Short"] = ma_fn( df["Close"], short)
+        # 2 MAs
+        elif len(params) == 2:
             short, long = params
             df["Short"] = ma_fn( df["Close"], short)
             df["Long"]  = ma_fn( df["Close"], long)
-
-        # 3 MAs crossover
+        # 3 MAs
         elif len(params) == 3:
             short, medium, long = params
             df["Short"] = ma_fn( df["Close"], short)
             df["Med"]   = ma_fn( df["Close"], medium)
             df["Long"]  = ma_fn( df["Close"], long)
         else:
-            raise ValueError(f"{ind_t} requires 2 or 3 periods, but received {len(params)}.")
+            raise ValueError(f"{ind_t} requires 1, 2 or 3 periods, but received {len(params)}.")    
     return df
 
 
@@ -92,10 +106,16 @@ def run_strategy(df, indicator, ma_v = 10):
 
     # generate buy/sell signals
     df["Signal"] = 0
+    if len(params) == 1:
+        # 1 MA crossover
+        df.loc[df["Short"] > df["Close"], "Signal"] = 1        # buy signal  ->  1
+        df.loc[df["Short"] < df["Close"], "Signal"] = -1       # sell signal -> -1
     if len(params) == 2:
+        # 2 MAs crossover
         df.loc[df["Short"] > df["Long"], "Signal"] = 1          # buy signal  ->  1
         df.loc[df["Short"] < df["Long"], "Signal"] = -1         # sell signal -> -1
     elif len(params) == 3:
+        # 3 MAs crossover
         df.loc[(df["Short"] > df["Med"]) & (df["Med"] > df["Long"]), "Signal"] = 1                              # buy signal  ->  1
         df.loc[(df["Short"] < df["Med"]) & (df["Med"] < df["Long"]), "Signal"] = -1                             # sell signal -> -1
     df["Signal_Length"] = df["Signal"].groupby((df["Signal"] != df["Signal"].shift()).cumsum()).cumcount() +1   # consecutive samples of same signal (signal length)

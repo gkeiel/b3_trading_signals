@@ -1,5 +1,4 @@
-import os
-import itertools
+import os, itertools
 import b3_trading_signals_functions as tsf
 from datetime import datetime
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
