@@ -3,13 +3,13 @@
 Este projeto disponibiliza um script Python para **geração automática de sinais de compra e venda de ativos da B3 (Bolsa de Valores Brasileira)**, aplicando estratégias de cruzamento de médias móveis em séries temporais do mercado à vista. Inclui um script para ***backtesting* e seleção das estratégias com melhor desempenho**, permitindo avaliar as abordagens antes de aplicá-las.
 
 Como principais vantagens, o projeto proporciona:
-- envio de sinais **via mensagem** e **sem a necessidade de análise gráfica**.
+- envio de sinais de negociação **via mensagem Telegram** e **sem a necessidade de análise gráfica**.
 - **código aberto** permitindo **flexibilidade para escolha das médias móveis** e comparação entre estratégias. 
 
 ## 📊 Funcionalidades
 
 - **Download de dados**: Realiza o download de dados de mercado pela API Yahoo Finance.
-- **Cruzamento de médias móveis**: Implementa estratégias de cruzamento de 2 ou 3 médias móveis SMA, WMA ou EMA para identificar possíveis tendências.
+- **Cruzamento de médias móveis**: Implementa estratégias de cruzamento de 2 ou 3 médias móveis (SMA, WMA ou EMA) para identificar possíveis tendências.
 - ***Backtesting* das estratégias**: Realiza teste das estratégias com dados históricos, gerando figuras e resumo para tomada de decisão.
 - **Avaliação de performance**: Avalia desempenho frente a uma função de ponderação e classifica as melhores estratégias.
 - **Notificações via Telegram**: Envia sinais de negociação provenientes da estratégia escolhida diretamente para o *smartphone*/computador.
@@ -103,10 +103,10 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
   Para projetos avançados e personalizados, entrar em contato com o desenvolvedor.
 
 
-## 🤝 Apoie o projeto
+## 🤝 Apoio
 
-Este repositório é mantido de forma independente, durante o tempo livre. Se o código lhe foi útil e deseja apoiar o desenvolvimento contínuo, considere fazer uma doação:
+Este repositório é mantido de forma independente, durante o tempo livre. Se o código lhe foi útil e deseja apoiar o seu desenvolvimento contínuo, considere fazer uma doação:
 
 - [PayPal](https://www.paypal.com/donate/?hosted_button_id=BF6E8J7P32KWE)  
 
-Seu apoio ajuda a manter e evoluir este projeto, adicionando novos indicadores, melhorias e documentação.
+Seu apoio ajuda a manter e evoluir o projeto, adicionando novos indicadores, melhorias e documentação.

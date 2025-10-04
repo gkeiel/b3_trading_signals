@@ -145,10 +145,12 @@ def plot_res(df, label):
     plt.plot(df.index, df["Close"], label=f"{ticker}")
     if "Short" in df and len(params) >= 1:
         plt.plot(df.index, df["Short"],  label=f"{ind_t}{params[0]}")
-    if "Med" in df and len(params) >= 2:
-        plt.plot(df.index, df["Med"], label=f"{ind_t}{params[1]}")
+    if "Long" in df and len(params) == 2:
+        plt.plot(df.index, df["Long"],   label=f"{ind_t}{params[1]}")
     if "Long" in df and len(params) >= 3:
-        plt.plot(df.index, df["Long"],   label=f"{ind_t}{params[2]}")
+        plt.plot(df.index, df["Long"],   label=f"{ind_t}{params[1]}")
+    if "Med" in df and len(params) >= 3:
+        plt.plot(df.index, df["Med"], label=f"{ind_t}{params[2]}")
     plt.title(f"{ticker} - Price")
     plt.legend()
     plt.grid(True)
