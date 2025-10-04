@@ -70,6 +70,7 @@ def setup_indicator(df, indicator):
         - ind_p: list with indicator values (10, 20)
 
     """
+    df     = df.copy()
     ind_t  = indicator.get("ind_t", "")
     params = indicator.get("ind_p", [])
 
@@ -98,7 +99,7 @@ def setup_indicator(df, indicator):
 
 
 def run_strategy(df, indicator, ma_v = 10):
-    ind_t  = indicator["ind_t"]
+    df     = df.copy()
     params = indicator["ind_p"]   
     
     # calculate volume MA
@@ -110,7 +111,7 @@ def run_strategy(df, indicator, ma_v = 10):
         # 1 MA crossover
         df.loc[df["Short"] > df["Close"], "Signal"] = 1        # buy signal  ->  1
         df.loc[df["Short"] < df["Close"], "Signal"] = -1       # sell signal -> -1
-    if len(params) == 2:
+    elif len(params) == 2:
         # 2 MAs crossover
         df.loc[df["Short"] > df["Long"], "Signal"] = 1          # buy signal  ->  1
         df.loc[df["Short"] < df["Long"], "Signal"] = -1         # sell signal -> -1
@@ -200,9 +201,9 @@ def export_best_results(bst_data):
 
 def export_report(report, end):
     # export report to local
-    report_df = pd.DataFrame({f"Report: {end}": report})
+    report_df = pd.DataFrame(report)
     with pd.ExcelWriter("report/report.xlsx", engine="openpyxl") as writer:
-        report_df.to_excel(writer, sheet_name=end, index=False)
+        report_df.to_excel(writer, sheet_name=str(end)[:10], index=False)
 
 
 def update_best_results(bst_data):

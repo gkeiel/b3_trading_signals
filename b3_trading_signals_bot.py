@@ -16,7 +16,7 @@ confirmations = tsf.load_confirmations()
 def main():
     # define start and end time
     start  = "2025-06-01"
-    end    = datetime.now().strftime("%Y-%m-%d")
+    end    = datetime.now()
     alerts = []
     report = []
 
@@ -32,21 +32,22 @@ def main():
         
         # download and backtest
         df = tsf.download_data(ticker, start, end)
-        df = tsf.setup_indicator(df, indicator)
-        df = tsf.run_strategy(df, indicator)
         conf = []
         for confirmation in confirmations:
-            df_c = tsf.setup_indicator(df, confirmation)
-            df_c = tsf.run_strategy(df, confirmation)
+            df_c = df.copy()
+            df_c = tsf.setup_indicator(df_c, confirmation)
+            df_c = tsf.run_strategy(df_c, confirmation)
             conf.append(df_c["Signal"].iloc[-1])
+        df = tsf.setup_indicator(df, indicator)
+        df = tsf.run_strategy(df, indicator)
 
         # obtain last: price, signal, signal length, volume strength
         last_clo = df["Close"].iloc[-1]
         last_sig = df["Signal"].iloc[-1]
         last_str = df["Signal_Length"].iloc[-1]
-        last_con = conf.count(1)
         last_vol = df["Volume_Strength"].iloc[-1]
-        
+        last_con = conf.count(1)
+
         # store report
         alerts.append({
             "Ticker": ticker,
