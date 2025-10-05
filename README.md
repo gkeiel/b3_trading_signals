@@ -3,7 +3,7 @@
 Este projeto disponibiliza um script Python para **geração automática de sinais de compra e venda de ativos da B3 (Bolsa de Valores Brasileira)**, aplicando estratégias de cruzamento de médias móveis em séries temporais do mercado à vista. Inclui um script para ***backtesting* e seleção das estratégias com melhor desempenho**, permitindo avaliar as abordagens antes de aplicá-las.
 
 Como principais vantagens, o projeto proporciona:
-- envio de sinais de negociação **via mensagem Telegram** e **sem a necessidade de análise gráfica**.
+- envio de **sinais de negociação recorrentes via Telegram** e que **evitem a necessidade de análise gráfica**.
 - **código aberto** permitindo **flexibilidade para escolha das médias móveis** e comparação entre estratégias. 
 
 ## 📊 Funcionalidades
@@ -64,10 +64,9 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
 - **Gráfico do *backtest* com SMA**
   
   Após a execução do script `b3_trading_signals.py` são gerados gráficos de cada estratégia, planilhas para cada *ticker*, planilha com melhores resultados. As figuras geradas seguem o exemplo mostrado abaixo:
-
   <p align="center">
-  <img width="733" height="395" alt="B3SA3 SA_5_30" src="https://github.com/user-attachments/assets/5f7c268b-1265-405a-a42f-a59f89729cd4"/>
-  <img width="733" height="395" alt="B3SA3 SA_backtest_5_30" src="https://github.com/user-attachments/assets/c0cbff4a-7189-43dd-b6bc-000b4cea62b0"/>
+     <img width="733" height="395" alt="B3SA3 SA_5_30" src="https://github.com/user-attachments/assets/5f7c268b-1265-405a-a42f-a59f89729cd4"/>
+     <img width="733" height="395" alt="B3SA3 SA_backtest_5_30" src="https://github.com/user-attachments/assets/c0cbff4a-7189-43dd-b6bc-000b4cea62b0"/>
   </p>
 
   Note como o ativo encerra o período avaliado próximo ao valor inicial, de modo que a estratégia *Buy & hold* resultaria em retorno nulo. Por outro lado, caso a estratégia SMA 5/30 fosse seguida à risca proporcionaria ao final do período um retorno de 20% sobre o valor investido, desconsiderando taxas de negociação. Ademais, a operação de venda a descoberto foi desconsiderada nos cálculos devido as taxas de aluguel envolvidas, embora possa facilmente ser habilitada no *backtest*.
@@ -75,17 +74,16 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
 - **Sinal de negociação via Telegram**
 
   Após a execução do script `b3_trading_signals_bot.py` são gerados sinais de negociação para as melhores estratégias escolhidas, seguindo o exemplo mostrado abaixo:
-
   <p align="center">
-  <img width="480" height="511" alt="telegram" src="https://github.com/user-attachments/assets/84a83c60-ac94-4759-bddf-b9708b5199f2" />
+     <img width="480" height="511" alt="telegram" src="https://github.com/user-attachments/assets/39ac0ee0-c816-4bd6-8742-b4884156051a" />
   </p>
 
-  Note como é gerado um sinal de negociação para cada ativo, sugerindo a tendência de alta ou baixa baseado na estratégia definida e o acumulado dessa tendência, que mostra a quantas amostras a tendência permanece sem trocar de lado.
+  Note como é gerado um sinal de negociação para cada ativo, sugerindo a tendência de alta, baixa ou neutralidade baseado na estratégia escolhida e a duração dessa tendência, que mostra a quantas amostras a tendência permanece sem trocar de lado. Adicionalmente, são mostrados dados de volume e das principais médias móveis como indicadores de força dessa tendência.
 
 ## 🧩 Estrutura do Projeto
 
 - `b3_trading_signals.py` → Arquivo principal para *backtest* e seleção das melhores estratégias.
-- `b3_trading_signals_bot.py` → Arquivo para geração de sinais diários e notificações via Telegram.
+- `b3_trading_signals_bot.py` → Arquivo principal para geração de sinais diários e notificações via Telegram.
 - `b3_trading_signals_functions.py` → Funções auxiliares reutilizáveis.
 - `b3_trading_signals_task_scheduler.py` → Criação de execução agendada no Windows.
 - `tickers.txt` → Lista de *tickers* para análise.
