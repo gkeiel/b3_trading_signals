@@ -92,14 +92,17 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
 
 ## 📌 Observações
 
-- Novos indicadores e funcionalidades poderão ser incorporados no futuro.
+⚠️ Não nos responsabilizamos por perdas ou prejuízos resultantes do uso das estratégias ou sinais gerados por este código.
+
 - Contribuições são bem-vindas! Abra uma *issue* ou envie um *pull request*.
-- Sanando possíveis dúvidas:
+- Novas melhorias e funcionalidades poderão ser incorporadas no futuro. Estão planejadas:
+  - alteração para o paradigma de POO;
+  - novos indicadores para o preço;
+  - alertas por e-mail e salvamento de arquivos em nuvem.
+- Possíveis dúvidas:
   - API Yahoo Finance: latência de 15 minutos para dados intradiários, sem limite de requisições;
   - API Brapi em seu plano gratuito: latência de 30 minutos, limite mensal de 15000 requisições;
   - Outras APIs: latências similares e/ou envolvem custo.
-  Para projetos avançados e personalizados, entrar em contato com o desenvolvedor.
-
 
 ## 🤝 Apoio
 
