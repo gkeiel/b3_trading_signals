@@ -27,8 +27,8 @@ class Loader:
             for line in f:
                 if line.strip():
                     parts = [p.strip() for p in line.split(",") if p.strip()]
-                    ind_t = parts[0]                    # indicator title
-                    ind_p = [int(x) for x in parts[1:]] # indicator parameters
+                    ind_t = parts[0]                        # indicator title
+                    ind_p = [int(x) for x in parts[1:]]     # indicator parameters
                     indicators.append({"ind_t":ind_t, "ind_p":ind_p})
         return indicators
 
@@ -44,7 +44,10 @@ class Loader:
 
     def download_data(self, ticker, start, end):
         # collect OHLCVDS data from Yahoo Finance
-        df = yf.download(ticker, start, end, auto_adjust=True)
+        try:
+            df = yf.download(ticker, start, end, auto_adjust=True)
+        except Exception as err:
+            raise RuntimeError("Unexpected error in download_data.") from err
         df.columns = df.columns.droplevel(1)    
         df = df[["Close", "Volume"]]
         return df
@@ -117,41 +120,49 @@ class Backtester:
         self.df = df.copy()
 
     def run_strategy(self, indicator, ma_v = 10):
-        df     = self.df
-        params = indicator["ind_p"]   
+        try:
+            df     = self.df
+            params = indicator["ind_p"]   
     
-        # calculate volume MA
-        df["VMA"] = df["Volume"].rolling(window=ma_v).mean()        # volume MA
+            # calculate volume MA
+            df["VMA"] = df["Volume"].rolling(window=ma_v).mean()        # volume MA
 
-        # generate buy/sell signals
-        df["Signal"] = 0
-        if len(params) == 1:
-            # 1 MA crossover
-            df.loc[df["Short"] > df["Close"], "Signal"] = 1        # buy signal  ->  1
-            df.loc[df["Short"] < df["Close"], "Signal"] = -1       # sell signal -> -1
-        elif len(params) == 2:
-            # 2 MAs crossover
-            df.loc[df["Short"] > df["Long"], "Signal"] = 1          # buy signal  ->  1
-            df.loc[df["Short"] < df["Long"], "Signal"] = -1         # sell signal -> -1
-        elif len(params) == 3:
-            # 3 MAs crossover
-            df.loc[(df["Short"] > df["Med"]) & (df["Med"] > df["Long"]), "Signal"] = 1                              # buy signal  ->  1
-            df.loc[(df["Short"] < df["Med"]) & (df["Med"] < df["Long"]), "Signal"] = -1                             # sell signal -> -1
-        df["Signal_Length"] = df["Signal"].groupby((df["Signal"] != df["Signal"].shift()).cumsum()).cumcount() +1   # consecutive samples of same signal (signal length)
-        df.loc[df["Signal"] == 0, "Signal_Strength"] = 0                                                            # strength is zero while there is no signal
-        df["Volume_Strength"] = (df["Volume"] -df["VMA"])/df["VMA"]                                                 # volume strenght
+            # generate buy/sell signals
+            df["Signal"] = 0
+            if len(params) == 1:
+                # 1 MA crossover
+                df.loc[df["Short"] > df["Close"], "Signal"] = 1         # buy signal  ->  1
+                df.loc[df["Short"] < df["Close"], "Signal"] = -1        # sell signal -> -1
+            elif len(params) == 2:
+                # 2 MAs crossover
+                df.loc[df["Short"] > df["Long"], "Signal"] = 1          # buy signal  ->  1
+                df.loc[df["Short"] < df["Long"], "Signal"] = -1         # sell signal -> -1
+            elif len(params) == 3:
+                # 3 MAs crossover
+                df.loc[(df["Short"] > df["Med"]) & (df["Med"] > df["Long"]), "Signal"] = 1                              # buy signal  ->  1
+                df.loc[(df["Short"] < df["Med"]) & (df["Med"] < df["Long"]), "Signal"] = -1                             # sell signal -> -1
+            df["Signal_Length"] = df["Signal"].groupby((df["Signal"] != df["Signal"].shift()).cumsum()).cumcount() +1   # consecutive samples of same signal (signal length)
+            df.loc[df["Signal"] == 0, "Signal_Strength"] = 0                                                            # strength is zero while there is no signal
+            df["Volume_Strength"] = (df["Volume"] -df["VMA"])/df["VMA"]                                                 # volume strenght
 
-        # simulate execution (backtest)
-        df["Position"] = df["Signal"].shift(1)                      # simulate position (using previous sample)
-        df.loc[df["Position"] == -1, "Position"] = 0                # comment if also desired selling operations  
-        df["Trade"] = df["Position"].diff().abs()                   # simulate trade
-        df["Return"] = df["Close"].pct_change()                     # asset percentage variation (in relation to previous sample)
-        df["Strategy"] = df["Position"]*df["Return"]                # return of the strategy
+            # simulate execution (backtest)
+            df["Position"] = df["Signal"].shift(1)                      # simulate position (using previous sample)
+            df.loc[df["Position"] == -1, "Position"] = 0                # comment if also desired selling operations  
+            df["Trade"] = df["Position"].diff().abs()                   # simulate trade
+            df["Return"] = df["Close"].pct_change()                     # asset percentage variation (in relation to previous sample)
+            df["Strategy"] = df["Position"]*df["Return"]                # return of the strategy
     
-        # compare buy & hold vs current strategy
-        df["Cumulative_Market"] = (1 +df["Return"]).cumprod()       # cumulative return buy & hold strategy
-        df["Cumulative_Strategy"] = (1 +df["Strategy"]).cumprod()   # cumulative return current strategy
-        df["Cumulative_Trades"] = df["Trade"].cumsum()              # cumulative number of trades
+            # compare buy & hold vs current strategy
+            df["Cumulative_Market"] = (1 +df["Return"]).cumprod()       # cumulative return buy & hold strategy
+            df["Cumulative_Strategy"] = (1 +df["Strategy"]).cumprod()   # cumulative return current strategy
+            df["Cumulative_Trades"] = df["Trade"].cumsum()              # cumulative number of trades
+        
+        except KeyError as err:
+            raise KeyError(f"Required column missing in backtest: {err}")
+        except ZeroDivisionError as err:
+            raise RuntimeError("Division by zero in backtest calculations.") from err
+        except Exception as err:
+            raise RuntimeError(f"Error in backtest run_strategy: {err}") from err
         return df
 
     def plot_res(self, label):
@@ -161,11 +172,11 @@ class Backtester:
         plt.figure(figsize=(12,6))
         plt.plot(self.df.index, self.df["Close"], label=f"{ticker}")
         if "Short" in self.df and len(params) >= 1:
-            plt.plot(self.df.index, self.df["Short"],  label=f"{ind_t}{params[0]}")
+            plt.plot(self.df.index, self.df["Short"], label=f"{ind_t}{params[0]}")
         if "Long" in self.df and len(params) == 2:
-            plt.plot(self.df.index, self.df["Long"],   label=f"{ind_t}{params[1]}")
+            plt.plot(self.df.index, self.df["Long"], label=f"{ind_t}{params[1]}")
         if "Long" in self.df and len(params) >= 3:
-            plt.plot(self.df.index, self.df["Long"],   label=f"{ind_t}{params[1]}")
+            plt.plot(self.df.index, self.df["Long"], label=f"{ind_t}{params[1]}")
         if "Med" in self.df and len(params) >= 3:
             plt.plot(self.df.index, self.df["Med"], label=f"{ind_t}{params[2]}")
         plt.title(f"{ticker} - Price")
@@ -256,8 +267,8 @@ class Strategies:
 class Notifier:
     def __init__(self):
         load_dotenv()
-        self.TOKEN   = os.getenv("TOKEN")
-        self.CHAT_ID = os.getenv("CHAT_ID")
+        self.TOKEN    = os.getenv("TOKEN")
+        self.CHAT_ID  = os.getenv("CHAT_ID")
 
     def send_telegram(self, msg):
         url     = f"https://api.telegram.org/bot{self.TOKEN}/sendMessage"
