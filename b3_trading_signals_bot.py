@@ -1,17 +1,17 @@
 import os
-import b3_trading_signals_functions as tsf
 from datetime import datetime
+from b3_trading_signals_functions import Loader, Indicator, Strategies, Backtester, Exporter, Notifier
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 # import best strategies from strategies.csv: tickers, indicators
 csv_file   = "strategies.csv"                                                                   # from local folder
 #csv_file   = "https://drive.google.com/uc?export=download&id=1uwzEz3XullFI02U8QhsE3BCFGRliRZu2" # from cloud
-strategies = tsf.import_strategies(csv_file)
+strategies = Strategies().import_strategies(csv_file)
 tickers    = list(strategies.keys())
 
 # import standard indicators for signal confirmation
-confirmations = tsf.load_confirmations()
+confirmations = Loader().load_confirmations()
 
 def main():
     # define start and end time
@@ -31,15 +31,16 @@ def main():
         indicator = {"ind_t": ind_t, "ind_p": [int(p) for p in params]}
         
         # download and backtest
-        df = tsf.download_data(ticker, start, end)
+        loader = Loader("tickers.txt", "indicators.txt")
+        df = loader.download_data(ticker, start, end)
         conf = []
         for confirmation in confirmations:
             df_c = df.copy()
-            df_c = tsf.setup_indicator(df_c, confirmation)
-            df_c = tsf.run_strategy(df_c, confirmation)
+            df_c = Indicator(indicator).setup_indicator(df_c)
+            df_c = Backtester(df_c).run_strategy(confirmation)
             conf.append(df_c["Signal"].iloc[-1])
-        df = tsf.setup_indicator(df, indicator)
-        df = tsf.run_strategy(df, indicator)
+        df = Indicator(indicator).setup_indicator(df)
+        df = Backtester(df).run_strategy(indicator)
 
         # obtain last: price, signal, signal length, volume strength
         last_clo = df["Close"].iloc[-1]
@@ -72,13 +73,14 @@ def main():
         report.append(msg)
 
         # notifies via Telegram
+        notifier = Notifier()
         try:
-            tsf.send_telegram(msg)
+            notifier.send_telegram(msg)
         except Exception as err:
             print("Telegram error:", err)
 
     # export report
-    tsf.export_report(report, end)
+    Exporter().export_report(report, end)
 
 
 if __name__ == "__main__":

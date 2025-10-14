@@ -96,7 +96,7 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
 
 - Contribuições são bem-vindas! Abra uma *issue* ou envie um *pull request*.
 - Novas melhorias e funcionalidades poderão ser incorporadas no futuro. Estão planejadas:
-  - alteração para o paradigma de POO;
+  - alteração para o paradigma de orientação a objeto (POO); ✅
   - novos indicadores para o preço;
   - alertas por e-mail e salvamento de arquivos em nuvem.
 - Possíveis dúvidas:
