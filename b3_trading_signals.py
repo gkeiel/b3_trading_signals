@@ -59,7 +59,7 @@ def main():
             backtest.plot_res(label)
 
         # compute best strategies (for each ticker)
-        bst_data = Strategies().best_strategy(res_data, w_return = 1, w_trades = 0.01)
+        bst_data = Strategies().best_strategy(res_data, preset="agressive")
 
         # exports dataframe for analysis
         exporter = Exporter()

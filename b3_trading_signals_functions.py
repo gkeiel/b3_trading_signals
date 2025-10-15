@@ -142,7 +142,7 @@ class Backtester:
                 df.loc[(df["Short"] > df["Med"]) & (df["Med"] > df["Long"]), "Signal"] = 1                              # buy signal  ->  1
                 df.loc[(df["Short"] < df["Med"]) & (df["Med"] < df["Long"]), "Signal"] = -1                             # sell signal -> -1
             df["Signal_Length"] = df["Signal"].groupby((df["Signal"] != df["Signal"].shift()).cumsum()).cumcount() +1   # consecutive samples of same signal (signal length)
-            df.loc[df["Signal"] == 0, "Signal_Strength"] = 0                                                            # strength is zero while there is no signal
+            df.loc[df["Signal"] == 0, "Signal_Length"] = 0                                                              # length is zero while there is no signal
             df["Volume_Strength"] = (df["Volume"] -df["VMA"])/df["VMA"]                                                 # volume strenght
 
             # simulate execution (backtest)
@@ -245,17 +245,32 @@ class Exporter:
 #  Strategy Manager
 # =====================================================
 class Strategies:
+    PRESET_DEFAULT = "basic"
+    PRESET = {
+        "basic":     {"w_return": 1.0, "w_trades": 0.1},
+        "balanced":  {"w_return": 1.0, "w_trades": 0.2},
+        "agressive": {"w_return": 1.0, "w_trades": 0.0},
+    }
+    
     def import_strategies(self, csv_file):
         # import strategies
         strategies = pd.read_csv(csv_file).set_index("Ticker").to_dict("index")
         return strategies
 
-    def best_strategy(self, res_data, w_return, w_trades):
+    def best_strategy(self, res_data, preset, **weights):
         bst_data = {}
 
+        if preset not in self.PRESET:
+            print(f"Preset not recognized. Using {self.PRESET_DEFAULT}.")
+            preset = self.PRESET_DEFAULT
+
+        params = {**self.PRESET[preset], **weights}
+        w_return = params["w_return"]
+        w_trades = params["w_trades"]
+        
         for ticker, ticker_results in res_data.items():
             df = pd.DataFrame.from_dict(ticker_results, orient="index")
-            # define desired SCORE
+            # calculate SCORE
             df["Score"]      = w_return*df["Return_Strategy"] -w_trades*df["Trades"]
             bst_data[ticker] = df.sort_values("Score", ascending=False)
         return bst_data
