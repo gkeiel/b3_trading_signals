@@ -81,8 +81,8 @@ class Indicator:
         parameters:
         - df: dataframe with column 'Close'
         - indicator: dictionary with
-        - ind_t: str with indicator name ("SMA", "WMA", "EMA")
-        - ind_p: list with indicator values (10, 20)
+            - ind_t: str with indicator name ("SMA", "WMA", "EMA")
+            - ind_p: list with indicator values (10, 20)
         """
         df     = df.copy()
         ind_t  = self.indicator.get("ind_t", "")
@@ -152,10 +152,14 @@ class Backtester:
             df["Return"] = df["Close"].pct_change()                     # asset percentage variation (in relation to previous sample)
             df["Strategy"] = df["Position"]*df["Return"]                # return of the strategy
     
-            # compare buy & hold vs current strategy
+            # compare benchmark vs current strategy
             df["Cumulative_Market"] = (1 +df["Return"]).cumprod()       # cumulative return buy & hold strategy
             df["Cumulative_Strategy"] = (1 +df["Strategy"]).cumprod()   # cumulative return current strategy
             df["Cumulative_Trades"] = df["Trade"].cumsum()              # cumulative number of trades
+        
+            # calculate drawdown
+            df["Drawdown"] = (df["Cumulative_Strategy"] -df["Cumulative_Strategy"].cummax())/df["Cumulative_Strategy"].cummax()
+            
         
         except KeyError as err:
             raise KeyError(f"Required column missing in backtest: {err}")
@@ -247,9 +251,9 @@ class Exporter:
 class Strategies:
     PRESET_DEFAULT = "basic"
     PRESET = {
-        "basic":     {"w_return": 1.0, "w_trades": 0.1},
-        "balanced":  {"w_return": 1.0, "w_trades": 0.2},
-        "agressive": {"w_return": 1.0, "w_trades": 0.0},
+        "basic":     {"w_return": 1.0, "w_trades": 0.02, "w_sharpe": 0, "w_drdown": 0},
+        "balanced":  {"w_return": 1.0, "w_trades": 0.04, "w_sharpe": 0, "w_drdown": 0},
+        "agressive": {"w_return": 1.0, "w_trades": 0.04, "w_sharpe": 0.01, "w_drdown": 0.01},
     }
     
     def import_strategies(self, csv_file):
@@ -267,11 +271,20 @@ class Strategies:
         params = {**self.PRESET[preset], **weights}
         w_return = params["w_return"]
         w_trades = params["w_trades"]
+        w_sharpe = params["w_sharpe"]
+        w_drdown = params["w_drdown"]
+        
         
         for ticker, ticker_results in res_data.items():
             df = pd.DataFrame.from_dict(ticker_results, orient="index")
+            
             # calculate SCORE
-            df["Score"]      = w_return*df["Return_Strategy"] -w_trades*df["Trades"]
+            df["Score"] = (
+                w_return*df["Return_Strategy"]
+                -w_trades*df["Trades"]
+                +w_sharpe*df["Sharpe"]
+                -w_drdown*df["Max_Drawdown"]
+            )
             bst_data[ticker] = df.sort_values("Score", ascending=False)
         return bst_data
 

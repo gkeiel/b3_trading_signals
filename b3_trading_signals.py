@@ -54,12 +54,14 @@ def main():
                 "Return_Market": df["Cumulative_Market"].iloc[-1],
                 "Return_Strategy": df["Cumulative_Strategy"].iloc[-1],
                 "Trades": df["Cumulative_Trades"].iloc[-1]//2,
+                "Sharpe": df["Strategy"].mean()/df["Strategy"].std()*pow(len(df["Strategy"]), 0.5),
+                "Max_Drawdown": abs(df["Drawdown"].min()),
                 "Score": 0
             }
             backtest.plot_res(label)
 
         # compute best strategies (for each ticker)
-        bst_data = Strategies().best_strategy(res_data, preset="agressive")
+        bst_data = Strategies().best_strategy(res_data, preset="basic")
 
         # exports dataframe for analysis
         exporter = Exporter()

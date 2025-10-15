@@ -11,7 +11,7 @@ Como principais vantagens, o projeto proporciona:
 - **Download de dados**: Realiza o download de dados de mercado pela API Yahoo Finance.
 - **Cruzamento de médias móveis**: Implementa estratégias de cruzamento de 2 ou 3 médias móveis (SMA, WMA ou EMA) para identificar possíveis tendências.
 - ***Backtesting* das estratégias**: Realiza teste das estratégias com dados históricos, gerando figuras e resumo para tomada de decisão.
-- **Avaliação de performance**: Avalia desempenho frente a uma função de ponderação e classifica as melhores estratégias.
+- **Avaliação de performance**: Avalia desempenho frente a uma função objetivo de ponderação e classifica as melhores estratégias.
 - **Notificações via Telegram**: Envia sinais de negociação provenientes da estratégia escolhida diretamente para o *smartphone*/computador.
 - **Agendamento automático**: Configura tarefa para execução diária no GitHub Actions ou então pelo Agendador de Tarefas do Windows.
 - **Arquivos de configuração**: Utiliza `.env` para variáveis de ambiente privadas, `.txt` para lista de códigos, `.txt`para lista de indicadores e `.csv` para lista de estratégias.
@@ -97,8 +97,10 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
 - Contribuições são bem-vindas! Abra uma *issue* ou envie um *pull request*.
 - Novas melhorias e funcionalidades poderão ser incorporadas no futuro. Estão planejadas:
   - alteração para o paradigma de orientação a objeto (POO); ✅
+  - melhoria na função objetivo com novas ponderações e *presets*; ✅
   - novos indicadores para o preço;
-  - alertas por e-mail e salvamento de arquivos em nuvem.
+  - salvamento de arquivos em nuvem;
+  - alertas/relatório por e-mail.
 - Possíveis dúvidas:
   - API Yahoo Finance: latência de 15 minutos para dados intradiários, sem limite de requisições;
   - API Brapi em seu plano gratuito: latência de 30 minutos, limite mensal de 15000 requisições;
