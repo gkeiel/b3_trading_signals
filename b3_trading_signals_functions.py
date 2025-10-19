@@ -12,10 +12,11 @@ matplotlib.use("Agg")
 #  Loader
 # =====================================================
 class Loader:
-    def __init__(self, file_tickers=None, file_indicators=None):
+    def __init__(self, file_tickers=None, file_indicators=None, market="BR"):
         self.file_tickers = file_tickers
         self.file_indicators = file_indicators
-
+        self.market = market
+        
     def load_tickers(self):
         with open(self.file_tickers, "r", encoding="utf-8") as f:
             tickers = [line.strip() for line in f if line.strip()]
@@ -41,11 +42,16 @@ class Loader:
             {"ind_t": "SMA", "ind_p": [100]},
             {"ind_t": "SMA", "ind_p": [200]},
         ]
+        
+    def format_ticker(self, ticker):
+        if self.market == "BR" and not ticker.endswith(".SA"):
+            return f"{ticker}.SA"
+        return ticker
 
     def download_data(self, ticker, start, end):
         # collect OHLCVDS data from Yahoo Finance
         try:
-            df = yf.download(ticker, start, end, auto_adjust=True)
+            df = yf.download(self.format_ticker(ticker), start, end, auto_adjust=True)
         except Exception as err:
             raise RuntimeError("Unexpected error in download_data.") from err
         df.columns = df.columns.droplevel(1)    
@@ -81,8 +87,8 @@ class Indicator:
         parameters:
         - df: dataframe with column 'Close'
         - indicator: dictionary with
-        - ind_t: str with indicator name ("SMA", "WMA", "EMA")
-        - ind_p: list with indicator values (10, 20)
+            - ind_t: str with indicator name ("SMA", "WMA", "EMA")
+            - ind_p: list with indicator values (10, 20)
         """
         df     = df.copy()
         ind_t  = self.indicator.get("ind_t", "")
@@ -142,7 +148,7 @@ class Backtester:
                 df.loc[(df["Short"] > df["Med"]) & (df["Med"] > df["Long"]), "Signal"] = 1                              # buy signal  ->  1
                 df.loc[(df["Short"] < df["Med"]) & (df["Med"] < df["Long"]), "Signal"] = -1                             # sell signal -> -1
             df["Signal_Length"] = df["Signal"].groupby((df["Signal"] != df["Signal"].shift()).cumsum()).cumcount() +1   # consecutive samples of same signal (signal length)
-            df.loc[df["Signal"] == 0, "Signal_Strength"] = 0                                                            # strength is zero while there is no signal
+            df.loc[df["Signal"] == 0, "Signal_Length"] = 0                                                              # length is zero while there is no signal
             df["Volume_Strength"] = (df["Volume"] -df["VMA"])/df["VMA"]                                                 # volume strenght
 
             # simulate execution (backtest)
@@ -152,10 +158,14 @@ class Backtester:
             df["Return"] = df["Close"].pct_change()                     # asset percentage variation (in relation to previous sample)
             df["Strategy"] = df["Position"]*df["Return"]                # return of the strategy
     
-            # compare buy & hold vs current strategy
+            # compare benchmark vs current strategy
             df["Cumulative_Market"] = (1 +df["Return"]).cumprod()       # cumulative return buy & hold strategy
             df["Cumulative_Strategy"] = (1 +df["Strategy"]).cumprod()   # cumulative return current strategy
             df["Cumulative_Trades"] = df["Trade"].cumsum()              # cumulative number of trades
+        
+            # calculate drawdown
+            df["Drawdown"] = (df["Cumulative_Strategy"] -df["Cumulative_Strategy"].cummax())/df["Cumulative_Strategy"].cummax()
+            
         
         except KeyError as err:
             raise KeyError(f"Required column missing in backtest: {err}")
@@ -245,20 +255,50 @@ class Exporter:
 #  Strategy Manager
 # =====================================================
 class Strategies:
+    PRESET_DEFAULT = "basic"
+    PRESET = {
+        "basic":     {"w_return": 1.0, "w_trades": 0.02, "w_sharpe": 0, "w_drdown": 0},
+        "balanced":  {"w_return": 1.0, "w_trades": 0.04, "w_sharpe": 0.01, "w_drdown": 0.05},
+        "agressive": {"w_return": 1.0, "w_trades": 0, "w_sharpe": 0.02, "w_drdown": 0},
+        "defensive": {"w_return": 1.0, "w_trades": 0.05, "w_sharpe": 0, "w_drdown": 0.05},
+    }
+    
+    def best_strategy(self, res_data, preset, **weights):
+        """
+        Manages scoring presets for strategy in a deterministic grid evaluation:
+        tests all parameter combinations and ranks them using
+        weighted objective scores defined by each preset.
+        """
+        bst_data = {}
+
+        if preset not in self.PRESET:
+            print(f"Preset not recognized. Using {self.PRESET_DEFAULT}.")
+            preset = self.PRESET_DEFAULT
+
+        params = {**self.PRESET[preset], **weights}
+        w_return = params["w_return"]
+        w_trades = params["w_trades"]
+        w_sharpe = params["w_sharpe"]
+        w_drdown = params["w_drdown"]
+        
+        
+        for ticker, ticker_results in res_data.items():
+            df = pd.DataFrame.from_dict(ticker_results, orient="index")
+            
+            # calculate SCORE (higher is better)
+            df["Score"] = (
+                w_return*df["Return_Strategy"]
+                -w_trades*df["Trades"]
+                +w_sharpe*df["Sharpe"]
+                -w_drdown*df["Max_Drawdown"]
+            )
+            bst_data[ticker] = df.sort_values("Score", ascending=False)
+        return bst_data
+    
     def import_strategies(self, csv_file):
         # import strategies
         strategies = pd.read_csv(csv_file).set_index("Ticker").to_dict("index")
         return strategies
-
-    def best_strategy(self, res_data, w_return, w_trades):
-        bst_data = {}
-
-        for ticker, ticker_results in res_data.items():
-            df = pd.DataFrame.from_dict(ticker_results, orient="index")
-            # define desired SCORE
-            df["Score"]      = w_return*df["Return_Strategy"] -w_trades*df["Trades"]
-            bst_data[ticker] = df.sort_values("Score", ascending=False)
-        return bst_data
 
 
 # =====================================================
@@ -267,8 +307,8 @@ class Strategies:
 class Notifier:
     def __init__(self):
         load_dotenv()
-        self.TOKEN    = os.getenv("TOKEN")
-        self.CHAT_ID  = os.getenv("CHAT_ID")
+        self.TOKEN    = os.getenv("TOKEN")      # bot TOKEN
+        self.CHAT_ID  = os.getenv("CHAT_ID")    # channel ID
 
     def send_telegram(self, msg):
         url     = f"https://api.telegram.org/bot{self.TOKEN}/sendMessage"

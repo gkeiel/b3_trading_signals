@@ -25,7 +25,11 @@ jobs:
         env:
           TOKEN: ${{ secrets.TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-        run: python b3_trading_signals_bot.py
+        run: |
+          for i in {1..3}; do
+          echo "Attempt $i of 3."
+            python b3_trading_signals_bot.py && break || echo "Attempt $i has failed. Retrying in 30 seconds." && sleep 30
+          done
 
       - name: Upload report
         uses: actions/upload-artifact@v4

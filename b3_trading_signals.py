@@ -8,6 +8,9 @@ def main():
     # defines start and end time
     start = "2024-01-01"
     end   = datetime.now()
+    
+    # defines score profile
+    preset = "defensive"
 
     # initialize cache dictionaries
     raw_data = {}
@@ -54,12 +57,14 @@ def main():
                 "Return_Market": df["Cumulative_Market"].iloc[-1],
                 "Return_Strategy": df["Cumulative_Strategy"].iloc[-1],
                 "Trades": df["Cumulative_Trades"].iloc[-1]//2,
+                "Sharpe": df["Strategy"].mean()/df["Strategy"].std()*pow(len(df["Strategy"]), 0.5),
+                "Max_Drawdown": abs(df["Drawdown"].min()),
                 "Score": 0
             }
             backtest.plot_res(label)
 
         # compute best strategies (for each ticker)
-        bst_data = Strategies().best_strategy(res_data, w_return = 1, w_trades = 0.01)
+        bst_data = Strategies().best_strategy(res_data, preset)
 
         # exports dataframe for analysis
         exporter = Exporter()
@@ -81,4 +86,14 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    max_attempt = 3
+    
+    for attempt in range(1, max_attempt+1):
+        try:
+            print(f"Attempt {attempt} of {max_attempt}.")
+            main()
+            break
+        except Exception as err:
+            print(f"Error on attempt {attempt}: {err}.")
+            if attempt == max_attempt:
+                print("All attempts failed.")
