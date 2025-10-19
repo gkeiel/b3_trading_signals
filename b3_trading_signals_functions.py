@@ -12,10 +12,11 @@ matplotlib.use("Agg")
 #  Loader
 # =====================================================
 class Loader:
-    def __init__(self, file_tickers=None, file_indicators=None):
+    def __init__(self, file_tickers=None, file_indicators=None, market="BR"):
         self.file_tickers = file_tickers
         self.file_indicators = file_indicators
-
+        self.market = market
+        
     def load_tickers(self):
         with open(self.file_tickers, "r", encoding="utf-8") as f:
             tickers = [line.strip() for line in f if line.strip()]
@@ -41,11 +42,16 @@ class Loader:
             {"ind_t": "SMA", "ind_p": [100]},
             {"ind_t": "SMA", "ind_p": [200]},
         ]
+        
+    def format_ticker(self, ticker):
+        if self.market == "BR" and not ticker.endswith(".SA"):
+            return f"{ticker}.SA"
+        return ticker
 
     def download_data(self, ticker, start, end):
         # collect OHLCVDS data from Yahoo Finance
         try:
-            df = yf.download(ticker, start, end, auto_adjust=True)
+            df = yf.download(self.format_ticker(ticker), start, end, auto_adjust=True)
         except Exception as err:
             raise RuntimeError("Unexpected error in download_data.") from err
         df.columns = df.columns.droplevel(1)    
@@ -301,8 +307,8 @@ class Strategies:
 class Notifier:
     def __init__(self):
         load_dotenv()
-        self.TOKEN    = os.getenv("TOKEN")
-        self.CHAT_ID  = os.getenv("CHAT_ID")
+        self.TOKEN    = os.getenv("TOKEN")      # bot TOKEN
+        self.CHAT_ID  = os.getenv("CHAT_ID")    # channel ID
 
     def send_telegram(self, msg):
         url     = f"https://api.telegram.org/bot{self.TOKEN}/sendMessage"

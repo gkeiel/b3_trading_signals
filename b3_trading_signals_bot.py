@@ -5,8 +5,8 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 # import best strategies from strategies.csv: tickers, indicators
-csv_file   = "strategies.csv"                                                                   # from local folder
-#csv_file   = "https://drive.google.com/uc?export=download&id=1uwzEz3XullFI02U8QhsE3BCFGRliRZu2" # from cloud
+#csv_file   = "strategies.csv"                                                                   # from local folder
+csv_file   = "https://drive.google.com/uc?export=download&id=1uwzEz3XullFI02U8QhsE3BCFGRliRZu2" # from cloud
 strategies = Strategies().import_strategies(csv_file)
 tickers    = list(strategies.keys())
 
