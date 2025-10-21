@@ -312,7 +312,9 @@ class Notifier:
 
     def send_telegram(self, msg):
         url     = f"https://api.telegram.org/bot{self.TOKEN}/sendMessage"
-        payload = {"chat_id": self.CHAT_ID, "text": msg}
+        payload = {"chat_id": self.CHAT_ID, "text": msg, "parse_mode": "HTML", "disable_web_page_preview": True}
         r = requests.post(url, json=payload, timeout=10)
         r.raise_for_status()
+        msg_id = r.json()["result"]["message_id"]
         print("Telegram sent.")
+        return msg_id
