@@ -3,8 +3,11 @@
 Este projeto disponibiliza um script Python para **geração automática de sinais de compra e venda de ativos da B3 (Bolsa de Valores Brasileira)**, aplicando estratégias de cruzamento de médias móveis em séries temporais do mercado à vista. Inclui um script para ***backtesting* e seleção das estratégias com melhor desempenho**, permitindo avaliar as abordagens antes de aplicá-las.
 
 Como principais vantagens, o projeto proporciona:
-- envio de **sinais de negociação recorrentes via Telegram** e que **evitem a necessidade de análise gráfica**.
-- **código aberto** permitindo **flexibilidade para escolha das médias móveis** e comparação entre estratégias. 
+- envio de **sinais de negociação recorrentes via canal no Telegram** e que **evitem a necessidade de análise gráfica**.
+- **código aberto** permitindo **flexibilidade para escolha das médias móveis** e comparação entre estratégias.
+
+Canal Telegram aberto com sinais diários executado via GitHub Actions. Todos podem inscrever-se para uma impressão do que o *bot* pode oferecer.
+[t.me/b3_trading_signals_free](https://t.me/b3_trading_signals_free)
 
 ## 📊 Funcionalidades
 
@@ -13,7 +16,7 @@ Como principais vantagens, o projeto proporciona:
 - ***Backtesting* das estratégias**: Realiza teste das estratégias com dados históricos, gerando figuras e resumo para tomada de decisão.
 - **Avaliação de performance**: Avalia desempenho frente a uma função objetivo de ponderação e classifica as melhores estratégias.
 - **Notificações via Telegram**: Envia sinais de negociação provenientes da estratégia escolhida diretamente para o *smartphone*/computador.
-- **Agendamento automático**: Configura tarefa para execução diária no GitHub Actions ou então pelo Agendador de Tarefas do Windows.
+- **Agendamento automático**: Configura tarefa para execução recorrente via GitHub Actions ou então pelo Agendador de Tarefas do Windows.
 - **Arquivos de configuração**: Utiliza `.env` para variáveis de ambiente privadas, `.txt` para lista de códigos, `.txt`para lista de indicadores e `.csv` para lista de estratégias.
 
 ## 📈 Estratégias Disponíveis
@@ -42,8 +45,10 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
    - Em `strategies.csv` adicione os códigos das ações que deseja gerar sinais de negociação, cada qual com a respectiva melhor estratégia.
 
 3. **Configurar Telegram**
-   - Crie um *bot* no Telegram e obtenha o seu `TOKEN` e `CHAT_ID`.
-   - Adicione-os em `.env` para serem lidos por `b3_trading_signals_bot.py`.
+   - Crie um *bot* no Telegram e obtenha o seu `TOKEN`.
+   - Crie um canal no Telegram e obtenha o seu `CHAT_ID`.
+   - Adicione o *bot* como administrador do canal.
+   - Adicione as chaves em `.env` para serem lidas pelo `b3_trading_signals_bot.py`.
 
 4. **Executar o script**
    - Para rodar a batelada de *backtests* execute:
