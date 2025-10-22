@@ -78,18 +78,23 @@ def main():
         # notifies via Telegram
         notifier = Notifier()
         try:
-            msg_id = notifier.send_telegram(msg)
+            payload = {"chat_id": notifier.CHAT_ID, "text": msg, "parse_mode": "HTML", "disable_web_page_preview": True}
+            msg_id  = notifier.send_telegram(payload)
             messages[a["Ticker"]] = msg_id
         except Exception as err:
             print("Telegram error:", err)
     
-    summary = ["<b>Summary of the day:</b>"]
-    for ticker, msg_id in messages.items():
-        link = f"https://t.me/B3_trading_signals_free/{msg_id}"
-        summary.append(f"• <a href='{link}'>{ticker}</a>")
-    msg_summary = "\n".join(summary)
-    notifier.send_telegram(msg_summary)
-    
+    # summary in Telegram
+    try:
+        buttons = [[{"text": ticker, "url": f"https://t.me/{notifier.CHAT_ID.lstrip('@')}/{msg_id}"}] for ticker, msg_id in messages.items()]
+        payload = {"chat_id": notifier.CHAT_ID, "text": "<b>Summary:</b>", "parse_mode": "HTML", "reply_markup": {"inline_keyboard": buttons}}
+        sum_id  = notifier.send_telegram(payload)
+        
+        #payload = {"chat_id": notifier.CHAT_ID, "message_id": sum_id, "disable_notification": True}
+        #notifier.pin_telegram(payload)
+    except Exception as err:
+        print("Telegram error:", err)
+        
     # export report
     Exporter().export_report(report, end)
 
