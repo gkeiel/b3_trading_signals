@@ -19,7 +19,7 @@ def main():
     end    = datetime.now()
     alerts = []
     report = []
-
+        
     # run for each ticker
     for ticker in tickers:
         print(f"Processing {ticker}")
@@ -33,12 +33,12 @@ def main():
         # download and backtest
         loader = Loader("tickers.txt", "indicators.txt")
         df = loader.download_data(ticker, start, end)
-        conf = []
+        confir = []
         for confirmation in confirmations:
             df_c = df.copy()
             df_c = Indicator(indicator).setup_indicator(df_c)
             df_c = Backtester(df_c).run_strategy(confirmation)
-            conf.append(df_c["Signal"].iloc[-1])
+            confir.append(df_c["Signal"].iloc[-1])
         df = Indicator(indicator).setup_indicator(df)
         df = Backtester(df).run_strategy(indicator)
 
@@ -47,7 +47,7 @@ def main():
         last_sig = df["Signal"].iloc[-1]
         last_str = df["Signal_Length"].iloc[-1]
         last_vol = df["Volume_Strength"].iloc[-1]
-        last_con = conf.count(1)
+        last_con = confir.count(1)
 
         # store report
         alerts.append({
@@ -61,24 +61,40 @@ def main():
             "Volume_Strength": float(last_vol)
         })
     
+    messages = {}
     for a in alerts:
-        # trading signal message
+        # define signal
         if a["Signal"] != 0:       
             verb = "⬆️ BUY" if a["Signal"] == 1 else "⬇️ SELL"
         else:
             verb = "⏸️ NEUTRAL"
-        msg = (f"{a['Ticker']} | {verb} ({a['Indicator']}{'/'.join(a['Parameters'])}) Duration {a['Signal_Length']:d} | Price R${a['Close']:.2f}\n"
+        
+        # trading message
+        msg = (f"#{a['Ticker']} | {verb} ({a['Indicator']}{'/'.join(a['Parameters'])}) Duration {a['Signal_Length']:d} | Price R${a['Close']:.2f}\n"
                f"Volume Strength: {a['Volume_Strength']:.2f}\n"
-               f"Signal Confirmation: {a['Signal Confirmation']}/{len(conf)} BUY, {len(conf)-a['Signal Confirmation']}/{len(conf)} SELL")
+               f"Signal Confirmation: {a['Signal Confirmation']}/{len(confir)} BUY, {len(confir)-a['Signal Confirmation']}/{len(confir)} SELL")
         report.append(msg)
 
         # notifies via Telegram
         notifier = Notifier()
         try:
-            notifier.send_telegram(msg)
+            payload = {"chat_id": notifier.CHAT_ID, "text": msg, "parse_mode": "HTML", "disable_web_page_preview": True}
+            msg_id  = notifier.send_telegram(payload)
+            messages[a["Ticker"]] = msg_id
         except Exception as err:
             print("Telegram error:", err)
-
+    
+    # summary in Telegram
+    try:
+        buttons = [[{"text": ticker, "url": f"https://t.me/{notifier.CHAT_ID.lstrip('@')}/{msg_id}"}] for ticker, msg_id in messages.items()]
+        payload = {"chat_id": notifier.CHAT_ID, "text": "<b>Summary:</b>", "parse_mode": "HTML", "reply_markup": {"inline_keyboard": buttons}}
+        sum_id  = notifier.send_telegram(payload)
+        
+        #payload = {"chat_id": notifier.CHAT_ID, "message_id": sum_id, "disable_notification": True}
+        #notifier.pin_telegram(payload)
+    except Exception as err:
+        print("Telegram error:", err)
+        
     # export report
     Exporter().export_report(report, end)
 
