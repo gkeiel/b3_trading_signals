@@ -1,9 +1,9 @@
-import os
+import os, matplotlib, requests
 import yfinance as yf
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib 
-import requests
+from sklearn.tree import DecisionTreeRegressor
 from dotenv import load_dotenv
 matplotlib.use("Agg")
 
@@ -194,6 +194,15 @@ class Backtester:
         plt.grid(True)
         plt.savefig(f"results/{label}.png", dpi=300, bbox_inches="tight")
         plt.close()
+        
+        plt.figure(figsize=(12,6))
+        plt.plot(self.df.index, self.df["Close"], label=f"{ticker}")
+        plt.plot(self.df.index, self.df["Predicted_Close"], label="Predictions")
+        plt.title(f"{ticker} - Price")
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(f"results/{label}_forecast.png", dpi=300, bbox_inches="tight")
+        plt.close()
 
         plt.figure(figsize=(12,6))
         plt.plot(self.df.index, self.df["Cumulative_Market"], label="Buy & Hold")
@@ -203,6 +212,46 @@ class Backtester:
         plt.grid(True)
         plt.savefig(f"results/{label}_backtest.png", dpi=300, bbox_inches="tight")
         plt.close()
+
+
+# =====================================================
+#  Forecaster
+# =====================================================
+class Forecaster:
+    def __init__(self, df, n_lags=5):
+        self.df = df.copy()
+        self.model  = None
+        self.n_lags = n_lags
+        
+    def predictions(self):
+        df = self.df
+        y  = df["Close"]
+
+        # build features for ML model
+        X, Y = [], []
+        for i in range(self.n_lags, len(y)):
+            X.append(y.iloc[i-self.n_lags:i])
+            Y.append(y.iloc[i])
+        X = np.array(X)
+        Y = np.array(Y)
+
+        # train decision tree
+        tree = DecisionTreeRegressor(max_depth=5)
+        tree.fit(X, Y)
+        self.model = tree
+
+        # add to dataframe
+        y_hat = tree.predict(X)
+        df["Predicted_Close"] = np.nan
+        df.loc[df.index[self.n_lags:], "Predicted_Close"] = y_hat
+        return df
+    
+    def predict_next(self):
+        if self.model is None:
+            raise ValueError("No existing model.")
+        last_Y = self.df["Close"].iloc[-self.n_lags:].values.reshape(1, -1)               
+        y_hat  = self.model.predict(last_Y)[0]
+        return y_hat
 
 
 # =====================================================

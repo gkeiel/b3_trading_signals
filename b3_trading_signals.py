@@ -1,6 +1,6 @@
 import os, itertools, sys, traceback
 from datetime import datetime
-from b3_trading_signals_functions import Loader, Indicator, Strategies, Backtester, Exporter
+from b3_trading_signals_functions import Loader, Indicator, Strategies, Backtester, Forecaster, Exporter
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -36,10 +36,14 @@ def main():
             # setup indicator
             df = Indicator(indicator).setup_indicator(df)
 
+            # predictions
+            forecast = Forecaster(df)
+            df = forecast.predictions()
+            
             # run backtest
             backtest = Backtester(df)
             df = backtest.run_strategy(indicator)
-
+            
             if ticker not in res_data:
                 res_data[ticker] = {}
                 pro_data[ticker] = {}

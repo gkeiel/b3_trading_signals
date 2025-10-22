@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from b3_trading_signals_functions import Loader, Indicator, Strategies, Backtester, Exporter, Notifier
+from b3_trading_signals_functions import Loader, Indicator, Strategies, Backtester, Forecaster, Exporter, Notifier
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -40,13 +40,16 @@ def main():
             df_c = Backtester(df_c).run_strategy(confirmation)
             confir.append(df_c["Signal"].iloc[-1])
         df = Indicator(indicator).setup_indicator(df)
+        forecaster = Forecaster(df)
+        df = forecaster.predictions()
         df = Backtester(df).run_strategy(indicator)
 
-        # obtain last: price, signal, signal length, volume strength
+        # obtain last values: closing price, signal, signal length, volume strength, forecast
         last_clo = df["Close"].iloc[-1]
         last_sig = df["Signal"].iloc[-1]
         last_str = df["Signal_Length"].iloc[-1]
         last_vol = df["Volume_Strength"].iloc[-1]
+        last_for = forecaster.predict_next()
         last_con = confir.count(1)
 
         # store report
@@ -58,7 +61,8 @@ def main():
             "Signal": int(last_sig),
             "Signal_Length": int(last_str),
             "Signal Confirmation": last_con,
-            "Volume_Strength": float(last_vol)
+            "Volume_Strength": float(last_vol),
+            "Predicted_Close": float(last_for)
         })
     
     messages = {}
@@ -72,7 +76,8 @@ def main():
         # trading message
         msg = (f"#{a['Ticker']} | {verb} ({a['Indicator']}{'/'.join(a['Parameters'])}) Duration {a['Signal_Length']:d} | Price R${a['Close']:.2f}\n"
                f"Volume Strength: {a['Volume_Strength']:.2f}\n"
-               f"Signal Confirmation: {a['Signal Confirmation']}/{len(confir)} BUY, {len(confir)-a['Signal Confirmation']}/{len(confir)} SELL")
+               f"Signal Confirmation: {a['Signal Confirmation']}/{len(confir)} BUY, {len(confir)-a['Signal Confirmation']}/{len(confir)} SELL\n"
+               f"Predicted Price: R$ {a['Predicted_Close']:.2f}")
         report.append(msg)
 
         # notifies via Telegram
