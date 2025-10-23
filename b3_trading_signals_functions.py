@@ -1,9 +1,11 @@
-import os, matplotlib, requests
+import os, json, matplotlib, requests
 import yfinance as yf
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
 from dotenv import load_dotenv
 matplotlib.use("Agg")
 
@@ -12,10 +14,17 @@ matplotlib.use("Agg")
 #  Loader
 # =====================================================
 class Loader:
-    def __init__(self, file_tickers=None, file_indicators=None, market="BR"):
+    def __init__(self, file_config="config.json", file_tickers=None, file_indicators=None, market="BR"):
         self.file_tickers = file_tickers
         self.file_indicators = file_indicators
         self.market = market
+        self.load_config(file_config)
+        
+    def load_config(self, path):
+        with open(path, "r", encoding="utf-8") as f:
+            config = json.load(f)
+            self.start = config.get("start", "2024-01-01")
+            self.end = config.get("end", datetime.now())
         
     def load_tickers(self):
         with open(self.file_tickers, "r", encoding="utf-8") as f:
@@ -48,10 +57,10 @@ class Loader:
             return f"{ticker}.SA"
         return ticker
 
-    def download_data(self, ticker, start, end):
+    def download_data(self, ticker):
         # collect OHLCVDS data from Yahoo Finance
         try:
-            df = yf.download(self.format_ticker(ticker), start, end, auto_adjust=True)
+            df = yf.download(self.format_ticker(ticker), self.start, self.end, auto_adjust=True)
         except Exception as err:
             raise RuntimeError("Unexpected error in download_data.") from err
         df.columns = df.columns.droplevel(1)    
@@ -122,16 +131,24 @@ class Indicator:
 #  Backtester
 # =====================================================
 class Backtester:
-    def __init__(self, df):
+    def __init__(self, df, file_config="config.json"):
         self.df = df.copy()
+        self.load_config(file_config)
+        
+    def load_config(self, path):
+        with open(path, "r", encoding="utf-8") as f:
+            config = json.load(f)
+            cfg    = config.get("backtest", {})
+            
+        self.ma_v = cfg.get("ma_volume", 10)
 
-    def run_strategy(self, indicator, ma_v = 10):
+    def run_strategy(self, indicator):
         try:
             df     = self.df
             params = indicator["ind_p"]   
     
             # calculate volume MA
-            df["VMA"] = df["Volume"].rolling(window=ma_v).mean()        # volume MA
+            df["VMA"] = df["Volume"].rolling(window=self.ma_v).mean()        # volume MA
 
             # generate buy/sell signals
             df["Signal"] = 0
@@ -218,10 +235,20 @@ class Backtester:
 #  Forecaster
 # =====================================================
 class Forecaster:
-    def __init__(self, df, n_lags=5):
+    def __init__(self, df, file_config="config.json"):
         self.df = df.copy()
         self.model  = None
-        self.n_lags = n_lags
+        self.load_config(file_config)
+        
+    def load_config(self, path):
+        with open(path, "r", encoding="utf-8") as f:
+            config = json.load(f)
+            cfg    = config.get("forecast", {})
+            
+        self.method = cfg.get("method", "RF")
+        self.n_lags = cfg.get("lags", 5)
+        self.n_estimators = cfg.get("n_estimators", 50)
+        self.max_depth = cfg.get("max_depth", 5)
         
     def predictions(self):
         df = self.df
@@ -235,13 +262,18 @@ class Forecaster:
         X = np.array(X)
         Y = np.array(Y)
 
-        # train decision tree
-        tree = DecisionTreeRegressor(max_depth=5)
-        tree.fit(X, Y)
-        self.model = tree
+        # train decision trees
+        if self.method == "RF":
+            model = RandomForestRegressor(n_estimators=self.n_estimators, max_depth=self.max_depth, random_state=0)
+        elif self.method == "DT":
+            model = DecisionTreeRegressor(max_depth=self.max_depth)
+        model.fit(X, Y)
+        self.model = model
 
+        # predictions
+        y_hat = model.predict(X)
+        
         # add to dataframe
-        y_hat = tree.predict(X)
         df["Predicted_Close"] = np.nan
         df.loc[df.index[self.n_lags:], "Predicted_Close"] = y_hat
         return df
@@ -258,6 +290,14 @@ class Forecaster:
 #  Exporter
 # =====================================================
 class Exporter:
+    def __init__(self, file_config="config.json"):
+        self.load_config(file_config)
+
+    def load_config(self, path):
+        with open(path, "r", encoding="utf-8") as f:
+            config = json.load(f)
+            self.end = config.get("end", datetime.now())
+        
     def export_dataframe(self, pro_data):
         # export dataframe for further analysis
         for ticker, ticker_debug in pro_data.items():
@@ -283,11 +323,11 @@ class Exporter:
                 # write to .xlsx 
                 bst_df.to_excel(writer, sheet_name=ticker[:10], index=False)
 
-    def export_report(self, report, end):
+    def export_report(self, report):
         # export report to local
         report_df = pd.DataFrame(report)
         with pd.ExcelWriter("report/report.xlsx", engine="openpyxl") as writer:
-            report_df.to_excel(writer, sheet_name=str(end)[:10], index=False)
+            report_df.to_excel(writer, sheet_name=str(self.end)[:10], index=False)
 
     def update_best_results(self, bst_data):
         # update best results (for use in b3_trading_signals_bot)
@@ -304,15 +344,28 @@ class Exporter:
 #  Strategy Manager
 # =====================================================
 class Strategies:
-    PRESET_DEFAULT = "basic"
+    def __init__(self, file_config="config.json"):
+        self.load_config(file_config)
+
+    def load_config(self, path):
+        with open(path, "r", encoding="utf-8") as f:
+            config = json.load(f)
+            self.preset = config.get("preset", "basic")
+            
     PRESET = {
         "basic":     {"w_return": 1.0, "w_trades": 0.02, "w_sharpe": 0, "w_drdown": 0},
         "balanced":  {"w_return": 1.0, "w_trades": 0.04, "w_sharpe": 0.01, "w_drdown": 0.05},
         "agressive": {"w_return": 1.0, "w_trades": 0, "w_sharpe": 0.02, "w_drdown": 0},
         "defensive": {"w_return": 1.0, "w_trades": 0.05, "w_sharpe": 0, "w_drdown": 0.05},
     }
+            
+    def load_config(self, path):
+        with open(path, "r", encoding="utf-8") as f:
+            config = json.load(f)
+            cfg    = config.get("backtest", {})
+        self.preset = cfg.get("preset", "basic")
     
-    def best_strategy(self, res_data, preset, **weights):
+    def best_strategy(self, res_data, **weights):
         """
         Manages scoring presets for strategy in a deterministic grid evaluation:
         tests all parameter combinations and ranks them using
@@ -320,11 +373,7 @@ class Strategies:
         """
         bst_data = {}
 
-        if preset not in self.PRESET:
-            print(f"Preset not recognized. Using {self.PRESET_DEFAULT}.")
-            preset = self.PRESET_DEFAULT
-
-        params = {**self.PRESET[preset], **weights}
+        params = {**self.PRESET[self.preset], **weights}
         w_return = params["w_return"]
         w_trades = params["w_trades"]
         w_sharpe = params["w_sharpe"]

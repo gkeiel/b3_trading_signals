@@ -1,16 +1,10 @@
 import os, itertools, sys, traceback
-from datetime import datetime
 from b3_trading_signals_functions import Loader, Indicator, Strategies, Backtester, Forecaster, Exporter
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def main():
-    # defines start and end time
-    start = "2024-01-01"
-    end   = datetime.now()
-    
-    # defines score profile
-    preset = "defensive"
+    loader = Loader("config.json", "tickers.txt", "indicators.txt")
 
     # initialize cache dictionaries
     raw_data = {}
@@ -20,7 +14,6 @@ def main():
     # import lists of parameters:
     # - tickers
     # - strategies: simple moving average (SMA) combinations
-    loader     = Loader("tickers.txt", "indicators.txt")
     tickers    = loader.load_tickers()
     indicators = loader.load_indicators()
 
@@ -30,7 +23,7 @@ def main():
 
             # download data (only once)
             if ticker not in raw_data:
-                raw_data[ticker] = loader.download_data(ticker, start, end)
+                raw_data[ticker] = loader.download_data(ticker)
             df = raw_data[ticker]
 
             # setup indicator
@@ -68,7 +61,7 @@ def main():
             backtest.plot_res(label)
 
         # compute best strategies (for each ticker)
-        bst_data = Strategies().best_strategy(res_data, preset)
+        bst_data = Strategies().best_strategy(res_data)
 
         # exports dataframe for analysis
         exporter = Exporter()

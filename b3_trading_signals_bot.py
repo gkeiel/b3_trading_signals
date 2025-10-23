@@ -5,8 +5,8 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 # import best strategies from strategies.csv: tickers, indicators
-#csv_file   = "strategies.csv"                                                                   # from local folder
-csv_file   = "https://drive.google.com/uc?export=download&id=1uwzEz3XullFI02U8QhsE3BCFGRliRZu2" # from cloud
+csv_file   = "strategies.csv"                                                                   # from local folder
+#csv_file   = "https://drive.google.com/uc?export=download&id=1uwzEz3XullFI02U8QhsE3BCFGRliRZu2" # from cloud
 strategies = Strategies().import_strategies(csv_file)
 tickers    = list(strategies.keys())
 
@@ -14,9 +14,7 @@ tickers    = list(strategies.keys())
 confirmations = Loader().load_confirmations()
 
 def main():
-    # define start and end time
-    start  = "2025-06-01"
-    end    = datetime.now()
+    # initialize lists
     alerts = []
     report = []
         
@@ -31,8 +29,8 @@ def main():
         indicator = {"ind_t": ind_t, "ind_p": [int(p) for p in params]}
         
         # download and backtest
-        loader = Loader("tickers.txt", "indicators.txt")
-        df = loader.download_data(ticker, start, end)
+        loader = Loader("config.json", "tickers.txt", "indicators.txt")
+        df = loader.download_data(ticker)
         confir = []
         for confirmation in confirmations:
             df_c = df.copy()
@@ -101,7 +99,7 @@ def main():
         print("Telegram error:", err)
         
     # export report
-    Exporter().export_report(report, end)
+    Exporter().export_report(report)
 
 
 if __name__ == "__main__":
