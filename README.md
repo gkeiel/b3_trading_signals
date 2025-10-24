@@ -4,6 +4,7 @@ Este projeto disponibiliza um script Python para **geração automática de sina
 
 Como principais vantagens, o projeto proporciona:
 - envio de **sinais de negociação recorrentes via canal no Telegram** e que **evitem a necessidade de análise gráfica**.
+- usa **aprendizado de máquina** para a geração de sinal de confirmação.
 - **código aberto** permitindo **flexibilidade para escolha das médias móveis** e comparação entre estratégias.
 
 Canal Telegram aberto com sinais diários executado via GitHub Actions. Todos podem inscrever-se para uma impressão do que o *bot* pode oferecer.
@@ -15,6 +16,7 @@ Canal Telegram aberto com sinais diários executado via GitHub Actions. Todos po
 - **Cruzamento de médias móveis**: Implementa estratégias de cruzamento de 2 ou 3 médias móveis (SMA, WMA ou EMA) para identificar possíveis tendências.
 - ***Backtesting* das estratégias**: Realiza teste das estratégias com dados históricos, gerando figuras e resumo para tomada de decisão.
 - **Avaliação de performance**: Avalia desempenho frente a uma função objetivo de ponderação e classifica as melhores estratégias.
+- **Previsão do preço futuro**: Realiza predições baseadas em aprendizado de máquina supervisionado, aplicando árvores de decisão.
 - **Notificações via Telegram**: Envia sinais de negociação provenientes da estratégia escolhida diretamente para o *smartphone*/computador.
 - **Agendamento automático**: Configura tarefa para execução recorrente via GitHub Actions ou então pelo Agendador de Tarefas do Windows.
 - **Arquivos de configuração**: Utiliza `.env` para variáveis de ambiente privadas, `.txt` para lista de códigos, `.txt`para lista de indicadores e `.csv` para lista de estratégias.
@@ -37,6 +39,7 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
     pip install yfinance
     pip install requests
     pip install python-dotenv
+    pip install scikit-learn
     ```
 
 2. **Configurar códigos e indicadores**
@@ -89,8 +92,8 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
 
 - `b3_trading_signals.py` → Arquivo principal para *backtest* e seleção das melhores estratégias.
 - `b3_trading_signals_bot.py` → Arquivo principal para geração de sinais diários e notificações via Telegram.
-- `b3_trading_signals_functions.py` → Funções auxiliares reutilizáveis.
 - `b3_trading_signals_task_scheduler.py` → Criação de execução agendada no Windows.
+- `core/` → Classes e funções reutilizáveis.
 - `tickers.txt` → Lista de *tickers* para análise.
 - `indicators.txt` → Lista de indicadores para análise.
 - `strategies.csv` → Lista de estratégias para sinais de negociação consistindo de *tickers* e seus indicadores.
@@ -103,10 +106,10 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
 - Novas melhorias e funcionalidades poderão ser incorporadas no futuro. Estão planejadas:
   - alteração para o paradigma de orientação a objeto (POO); ✅
   - melhoria na função objetivo com novas ponderações e *presets*; ✅
-  - novos indicadores para o preço;
-  - salvamento de arquivos em nuvem;
+  - predição de preço futuro via árvores de decisão; ✅
+  - mais indicadores para o preço e estratégias;
   - alertas/relatório por e-mail.
-- Possíveis dúvidas:
+- Sobre bases de dados:
   - API Yahoo Finance: latência de 15 minutos para dados intradiários, sem limite de requisições;
   - API Brapi em seu plano gratuito: latência de 30 minutos, limite mensal de 15000 requisições;
   - Outras APIs: latências similares e/ou envolvem custo.

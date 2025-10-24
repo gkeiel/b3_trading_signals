@@ -1,26 +1,23 @@
 import os, itertools, sys, traceback
-from datetime import datetime
-from b3_trading_signals_functions import Loader, Indicator, Strategies, Backtester, Exporter
+from core.loader import Loader
+from core.indicator import Indicator
+from core.backtester import Backtester
+from core.forecaster import Forecaster
+from core.strategies import Strategies
+from core.exporter import Exporter
+from core.notifier import Notifier
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def main():
-    # defines start and end time
-    start = "2024-01-01"
-    end   = datetime.now()
-    
-    # defines score profile
-    preset = "defensive"
+    loader = Loader("config.json", "tickers.txt", "indicators.txt")
 
     # initialize cache dictionaries
     raw_data = {}
     pro_data = {}
     res_data = {}
 
-    # import lists of parameters:
-    # - tickers
-    # - strategies: simple moving average (SMA) combinations
-    loader     = Loader("tickers.txt", "indicators.txt")
+    # import lists
     tickers    = loader.load_tickers()
     indicators = loader.load_indicators()
 
@@ -30,16 +27,20 @@ def main():
 
             # download data (only once)
             if ticker not in raw_data:
-                raw_data[ticker] = loader.download_data(ticker, start, end)
+                raw_data[ticker] = loader.download_data(ticker)
             df = raw_data[ticker]
 
             # setup indicator
             df = Indicator(indicator).setup_indicator(df)
 
+            # predictions
+            forecast = Forecaster(df)
+            df = forecast.predictions()
+            
             # run backtest
             backtest = Backtester(df)
             df = backtest.run_strategy(indicator)
-
+            
             if ticker not in res_data:
                 res_data[ticker] = {}
                 pro_data[ticker] = {}
@@ -64,7 +65,7 @@ def main():
             backtest.plot_res(label)
 
         # compute best strategies (for each ticker)
-        bst_data = Strategies().best_strategy(res_data, preset)
+        bst_data = Strategies().best_strategy(res_data)
 
         # exports dataframe for analysis
         exporter = Exporter()

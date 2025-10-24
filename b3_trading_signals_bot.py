@@ -1,11 +1,17 @@
 import os
 from datetime import datetime
-from b3_trading_signals_functions import Loader, Indicator, Strategies, Backtester, Exporter, Notifier
+from core.loader import Loader
+from core.indicator import Indicator
+from core.backtester import Backtester
+from core.forecaster import Forecaster
+from core.strategies import Strategies
+from core.exporter import Exporter
+from core.notifier import Notifier
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 # import best strategies from strategies.csv: tickers, indicators
-#csv_file   = "strategies.csv"                                                                   # from local folder
+#csv_file   = "data/results/strategies.csv"                                                                   # from local folder
 csv_file   = "https://drive.google.com/uc?export=download&id=1uwzEz3XullFI02U8QhsE3BCFGRliRZu2" # from cloud
 strategies = Strategies().import_strategies(csv_file)
 tickers    = list(strategies.keys())
@@ -14,9 +20,7 @@ tickers    = list(strategies.keys())
 confirmations = Loader().load_confirmations()
 
 def main():
-    # define start and end time
-    start  = "2025-06-01"
-    end    = datetime.now()
+    # initialize lists
     alerts = []
     report = []
         
@@ -31,22 +35,25 @@ def main():
         indicator = {"ind_t": ind_t, "ind_p": [int(p) for p in params]}
         
         # download and backtest
-        loader = Loader("tickers.txt", "indicators.txt")
-        df = loader.download_data(ticker, start, end)
+        loader = Loader("config.json", "tickers.txt", "indicators.txt")
+        df = loader.download_data(ticker)
         confir = []
         for confirmation in confirmations:
             df_c = df.copy()
-            df_c = Indicator(indicator).setup_indicator(df_c)
+            df_c = Indicator(confirmation).setup_indicator(df_c)
             df_c = Backtester(df_c).run_strategy(confirmation)
             confir.append(df_c["Signal"].iloc[-1])
         df = Indicator(indicator).setup_indicator(df)
+        forecaster = Forecaster(df)
+        df = forecaster.predictions()
         df = Backtester(df).run_strategy(indicator)
 
-        # obtain last: price, signal, signal length, volume strength
+        # obtain last values: closing price, signal, signal length, volume strength, forecast
         last_clo = df["Close"].iloc[-1]
         last_sig = df["Signal"].iloc[-1]
         last_str = df["Signal_Length"].iloc[-1]
         last_vol = df["Volume_Strength"].iloc[-1]
+        last_for = forecaster.predict_next()
         last_con = confir.count(1)
 
         # store report
@@ -58,7 +65,8 @@ def main():
             "Signal": int(last_sig),
             "Signal_Length": int(last_str),
             "Signal Confirmation": last_con,
-            "Volume_Strength": float(last_vol)
+            "Volume_Strength": float(last_vol),
+            "Predicted_Close": float(last_for)
         })
     
     messages = {}
@@ -70,9 +78,10 @@ def main():
             verb = "⏸️ NEUTRAL"
         
         # trading message
-        msg = (f"#{a['Ticker']} | {verb} ({a['Indicator']}{'/'.join(a['Parameters'])}) Duration {a['Signal_Length']:d} | Price R${a['Close']:.2f}\n"
+        msg = (f"{a['Ticker']} | {verb} ({a['Indicator']}{'/'.join(a['Parameters'])}) Duration {a['Signal_Length']:d} | Price R${a['Close']:.2f}\n"
                f"Volume Strength: {a['Volume_Strength']:.2f}\n"
-               f"Signal Confirmation: {a['Signal Confirmation']}/{len(confir)} BUY, {len(confir)-a['Signal Confirmation']}/{len(confir)} SELL")
+               f"Signal Confirmation: {a['Signal Confirmation']}/{len(confir)} BUY, {len(confir)-a['Signal Confirmation']}/{len(confir)} SELL\n"
+               f"Predicted Price: R$ {a['Predicted_Close']:.2f}")
         report.append(msg)
 
         # notifies via Telegram
@@ -86,8 +95,13 @@ def main():
     
     # summary in Telegram
     try:
-        buttons = [[{"text": ticker, "url": f"https://t.me/{notifier.CHAT_ID.lstrip('@')}/{msg_id}"}] for ticker, msg_id in messages.items()]
-        payload = {"chat_id": notifier.CHAT_ID, "text": "<b>Summary:</b>", "parse_mode": "HTML", "reply_markup": {"inline_keyboard": buttons}}
+        summary = []
+        for ticker, msg_id in messages.items():
+            link = f"https://t.me/{notifier.CHAT_ID.lstrip('@')}/{msg_id}"                  # from public channel
+            #link = f"https://t.me/c/{str(notifier.CHAT_ID).replace('-100', '')}/{msg_id}"   # from private channel
+            summary.append(f'<a href="{link}">{ticker}</a>')
+        msg   =  " ○ ".join(summary)
+        payload = {"chat_id": notifier.CHAT_ID, "text": f"<b>Summary:</b>\n{msg}", "parse_mode": "HTML"}
         sum_id  = notifier.send_telegram(payload)
         
         #payload = {"chat_id": notifier.CHAT_ID, "message_id": sum_id, "disable_notification": True}
@@ -96,7 +110,7 @@ def main():
         print("Telegram error:", err)
         
     # export report
-    Exporter().export_report(report, end)
+    Exporter().export_report(report)
 
 
 if __name__ == "__main__":
