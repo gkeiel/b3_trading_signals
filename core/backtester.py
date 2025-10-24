@@ -85,7 +85,7 @@ class Backtester:
         plt.title(f"{ticker} - Price")
         plt.legend()
         plt.grid(True)
-        plt.savefig(f"results/{label}.png", dpi=300, bbox_inches="tight")
+        plt.savefig(f"data/results/{label}.png", dpi=300, bbox_inches="tight")
         plt.close()
         
         plt.figure(figsize=(12,6))
@@ -94,7 +94,7 @@ class Backtester:
         plt.title(f"{ticker} - Price")
         plt.legend()
         plt.grid(True)
-        plt.savefig(f"results/{label}_forecast.png", dpi=300, bbox_inches="tight")
+        plt.savefig(f"data/results/{label}_forecast.png", dpi=300, bbox_inches="tight")
         plt.close()
 
         plt.figure(figsize=(12,6))
@@ -103,5 +103,5 @@ class Backtester:
         plt.title(f"{ticker} - Backtest {ind_t}{'/'.join(params)}")
         plt.legend()
         plt.grid(True)
-        plt.savefig(f"results/{label}_backtest.png", dpi=300, bbox_inches="tight")
+        plt.savefig(f"data/results/{label}_backtest.png", dpi=300, bbox_inches="tight")
         plt.close()

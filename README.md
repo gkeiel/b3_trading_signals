@@ -39,6 +39,7 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
     pip install yfinance
     pip install requests
     pip install python-dotenv
+    pip install scikit-learn
     ```
 
 2. **Configurar códigos e indicadores**
@@ -91,8 +92,8 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
 
 - `b3_trading_signals.py` → Arquivo principal para *backtest* e seleção das melhores estratégias.
 - `b3_trading_signals_bot.py` → Arquivo principal para geração de sinais diários e notificações via Telegram.
-- `b3_trading_signals_functions.py` → Funções auxiliares reutilizáveis.
 - `b3_trading_signals_task_scheduler.py` → Criação de execução agendada no Windows.
+- `core/` → Classes e funções reutilizáveis.
 - `tickers.txt` → Lista de *tickers* para análise.
 - `indicators.txt` → Lista de indicadores para análise.
 - `strategies.csv` → Lista de estratégias para sinais de negociação consistindo de *tickers* e seus indicadores.
@@ -108,7 +109,7 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
   - predição de preço futuro via árvores de decisão; ✅
   - mais indicadores para o preço e estratégias;
   - alertas/relatório por e-mail.
-- Sobre a base de dados:
+- Sobre bases de dados:
   - API Yahoo Finance: latência de 15 minutos para dados intradiários, sem limite de requisições;
   - API Brapi em seu plano gratuito: latência de 30 minutos, limite mensal de 15000 requisições;
   - Outras APIs: latências similares e/ou envolvem custo.

@@ -2,7 +2,7 @@ import os, sys
 
 # """
 # This script automatically creates a Windows Task Scheduler entry 
-# to run main_bot.py daily at a specified time.
+# to run b3_trading_signals_bot.py daily at a specified time.
 # """
 
 # change working directory
@@ -10,7 +10,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
 # script path
-script_path = os.path.join(script_dir, "main_bot.py")
+script_path = os.path.join(script_dir, "b3_trading_signals_bot.py")
 
 # time for daily script
 script_hour = "17:05"

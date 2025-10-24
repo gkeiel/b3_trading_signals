@@ -17,9 +17,7 @@ def main():
     pro_data = {}
     res_data = {}
 
-    # import lists of parameters:
-    # - tickers
-    # - strategies: simple moving average (SMA) combinations
+    # import lists
     tickers    = loader.load_tickers()
     indicators = loader.load_indicators()
 
