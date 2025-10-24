@@ -5,7 +5,6 @@ from core.backtester import Backtester
 from core.forecaster import Forecaster
 from core.strategies import Strategies
 from core.exporter import Exporter
-from core.notifier import Notifier
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 

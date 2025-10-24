@@ -20,7 +20,7 @@ class Forecaster:
             
         self.method = cfg.get("method", "RF")
         self.n_lags = cfg.get("lags", 5)
-        self.n_estimators = cfg.get("n_estimators", 50)
+        self.n_estimators = cfg.get("n_estimators", 10)
         self.max_depth = cfg.get("max_depth", 5)
         
     def predictions(self):
