@@ -80,7 +80,7 @@ def main():
             verb = "⏸️ NEUTRAL"
         
         # trading message
-        msg = (f"{a['Ticker']} | {verb} ({a['Indicator']}{'/'.join(a['Parameters'])}) Duration {a['Signal_Length']:d} | Price R${a['Close']:.2f}\n"
+        msg = (f"#{a['Ticker']} | {verb} ({a['Indicator']}{'/'.join(a['Parameters'])}) Duration {a['Signal_Length']:d} | Price R${a['Close']:.2f}\n"
                f"Volume Strength: {a['Volume_Strength']:.2f}\n"
                f"Signal Confirmation: {a['Signal Confirmation']}/{len(confir)} BUY, {len(confir)-a['Signal Confirmation']}/{len(confir)} SELL\n"
                f"Entry Price: R$ {a['Entry_Price']:.2f}\n"
@@ -100,8 +100,8 @@ def main():
     try:
         summary = []
         for ticker, msg_id in messages.items():
+            link = f"https://t.me/c/{str(notifier.CHAT_ID).replace('-100', '')}/{msg_id}"   # from private channel
             link = f"https://t.me/{notifier.CHAT_ID.lstrip('@')}/{msg_id}"                  # from public channel
-            #link = f"https://t.me/c/{str(notifier.CHAT_ID).replace('-100', '')}/{msg_id}"   # from private channel
             summary.append(f'<a href="{link}">{ticker}</a>')
         msg   =  " ○ ".join(summary)
         payload = {"chat_id": notifier.CHAT_ID, "text": f"<b>Summary:</b>\n{msg}", "parse_mode": "HTML"}
