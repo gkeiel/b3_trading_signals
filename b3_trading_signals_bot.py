@@ -48,11 +48,12 @@ def main():
         df = forecaster.predictions()
         df = Backtester(df).run_strategy(indicator)
 
-        # obtain last values: closing price, signal, signal length, volume strength, forecast
+        # obtain last values: closing price, signal, signal length, volume strength, entry price, forecast
         last_clo = df["Close"].iloc[-1]
         last_sig = df["Signal"].iloc[-1]
         last_str = df["Signal_Length"].iloc[-1]
         last_vol = df["Volume_Strength"].iloc[-1]
+        last_ent = df["Entry_Price"].iloc[-1]
         last_for = forecaster.predict_next()
         last_con = confir.count(1)
 
@@ -66,6 +67,7 @@ def main():
             "Signal_Length": int(last_str),
             "Signal Confirmation": last_con,
             "Volume_Strength": float(last_vol),
+            "Entry_Price": float(last_ent),
             "Predicted_Close": float(last_for)
         })
     
@@ -78,9 +80,10 @@ def main():
             verb = "⏸️ NEUTRAL"
         
         # trading message
-        msg = (f"{a['Ticker']} | {verb} ({a['Indicator']}{'/'.join(a['Parameters'])}) Duration {a['Signal_Length']:d} | Price R${a['Close']:.2f}\n"
+        msg = (f"#{a['Ticker']} | {verb} ({a['Indicator']}{'/'.join(a['Parameters'])}) Duration {a['Signal_Length']:d} | Price R${a['Close']:.2f}\n"
                f"Volume Strength: {a['Volume_Strength']:.2f}\n"
                f"Signal Confirmation: {a['Signal Confirmation']}/{len(confir)} BUY, {len(confir)-a['Signal Confirmation']}/{len(confir)} SELL\n"
+               f"Entry Price: R$ {a['Entry_Price']:.2f}\n"
                f"Predicted Price: R$ {a['Predicted_Close']:.2f}")
         report.append(msg)
 
@@ -97,8 +100,8 @@ def main():
     try:
         summary = []
         for ticker, msg_id in messages.items():
+            link = f"https://t.me/c/{str(notifier.CHAT_ID).replace('-100', '')}/{msg_id}"   # from private channel
             link = f"https://t.me/{notifier.CHAT_ID.lstrip('@')}/{msg_id}"                  # from public channel
-            #link = f"https://t.me/c/{str(notifier.CHAT_ID).replace('-100', '')}/{msg_id}"   # from private channel
             summary.append(f'<a href="{link}">{ticker}</a>')
         msg   =  " ○ ".join(summary)
         payload = {"chat_id": notifier.CHAT_ID, "text": f"<b>Summary:</b>\n{msg}", "parse_mode": "HTML"}
