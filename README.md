@@ -19,7 +19,7 @@ Canal Telegram aberto com sinais diários executado via GitHub Actions. Todos po
 - **Previsão do preço futuro**: Realiza predições baseadas em aprendizado de máquina supervisionado, aplicando algoritmos de árvores de decisão.
 - **Notificações via Telegram**: Envia sinais de negociação provenientes da estratégia escolhida diretamente para o *smartphone*/computador.
 - **Agendamento automático**: Configura tarefa para execução recorrente via GitHub Actions ou então pelo Agendador de Tarefas do Windows.
-- **Arquivos de configuração**: Utiliza `.env` para variáveis de ambiente privadas, `.txt` para lista de códigos, `.txt`para lista de indicadores e `.csv` para lista de estratégias.
+- **Arquivos de configuração**: Utiliza `.env` para variáveis de ambiente privadas, `.json` para parâmetros de configuração, `.txt` para lista de códigos, `.txt`para lista de indicadores e `.csv` para lista de estratégias.
 
 ## 📈 Estratégias Disponíveis
 
@@ -43,10 +43,10 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
     ```
 
 2. **Configurar códigos e indicadores**
-   - Em `config.json` adicione os diversos parâmetros de configuração.
+   - Em `config.json` altere os parâmetros de configuração.
    - Em `tickers.txt` adicione os códigos das ações que deseja avaliar, um por linha.
    - Em `indicators.txt` adicione os indicadores que deseja gerar, um por linha. Inicialmente apenas SMA, WMA e EMA são implementáveis.
-   - Em `strategies.csv` adicione os códigos das ações que deseja gerar sinais de negociação, cada qual com a respectiva melhor estratégia.
+   - Em `strategies.csv` são salvos os códigos das ações que deseja gerar sinais de negociação, cada qual com a respectiva melhor estratégia.
 
 3. **Configurar Telegram**
    - Crie um *bot* no Telegram e obtenha o seu `TOKEN`.

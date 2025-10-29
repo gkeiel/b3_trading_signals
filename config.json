@@ -5,9 +5,9 @@
 
   "forecast": {
     "method": "RF",
-    "lags": 5,
     "n_estimators": 10,
-    "max_depth": 5
+    "max_depth": 5,
+    "lags": 5
   },
 
   "backtest": {

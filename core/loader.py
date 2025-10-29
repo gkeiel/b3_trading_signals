@@ -12,7 +12,7 @@ class Loader:
         self.file_indicators = file_indicators
         self.market = market
         self.load_config(file_config)
-        
+           
     def load_config(self, path):
         with open(path, "r", encoding="utf-8") as f:
             config = json.load(f)
