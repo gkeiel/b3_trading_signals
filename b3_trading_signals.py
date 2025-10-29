@@ -33,8 +33,7 @@ def main():
             df = Indicator(indicator).setup_indicator(df)
 
             # predictions
-            forecast = Forecaster(df)
-            df = forecast.predictions()
+            df = Forecaster(df).predictions()
             
             # run backtest
             backtest = Backtester(df)

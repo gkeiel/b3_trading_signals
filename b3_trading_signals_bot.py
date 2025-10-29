@@ -100,12 +100,11 @@ def main():
     try:
         summary = []
         for ticker, msg_id in messages.items():
-            link = f"https://t.me/c/{str(notifier.CHAT_ID).replace('-100', '')}/{msg_id}"   # from private channel
-            link = f"https://t.me/{notifier.CHAT_ID.lstrip('@')}/{msg_id}"                  # from public channel
+            link = f"https://t.me/{notifier.CHAT_ID.lstrip('@')}/{msg_id}"
             summary.append(f'<a href="{link}">{ticker}</a>')
         msg   =  " ○ ".join(summary)
-        payload = {"chat_id": notifier.CHAT_ID, "text": f"<b>Summary:</b>\n{msg}", "parse_mode": "HTML"}
-        sum_id  = notifier.send_telegram(payload)
+        payload = {"chat_id": notifier.CHAT_ID, "text": f"<b>Summary:</b>\n{msg}", "parse_mode": "HTML", "disable_web_page_preview": True}
+        notifier.send_telegram(payload)
         
         #payload = {"chat_id": notifier.CHAT_ID, "message_id": sum_id, "disable_notification": True}
         #notifier.pin_telegram(payload)
