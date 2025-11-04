@@ -23,38 +23,48 @@ class Indicator:
     def ema(series:pd.Series, window:int) -> pd.Series:
         # exponential moving average (EMA)
         return series.ewm(span=window, adjust=False).mean()
-
+        
+    @staticmethod
+    def bollinger_bands(series:pd.Series, window:int, std_dev:float=2.0):
+        # bollinger bands (BB)
+        middle = series.rolling(window=window).mean()
+        std    = series.rolling(window=window).std()
+        upper  = middle +(std_dev*std)
+        lower  = middle -(std_dev*std)
+        return middle, upper, lower
+        
     def setup_indicator(self, df):
         """
         parameters:
         - df: dataframe with column 'Close'
         - indicator: dictionary with
-            - ind_t: str with indicator name ("SMA", "WMA", "EMA")
+            - ind_t: str with indicator name ("SMA", "WMA", "EMA" or "BB")
             - ind_p: list with indicator values (10, 20)
         """
         df     = df.copy()
         ind_t  = self.indicator.get("ind_t", "")
         params = self.indicator.get("ind_p", [])
 
-        # function mapping
-        ma_fn  = {"SMA": self.sma, "EMA": self.ema, "WMA": self.wma}[ind_t]
-
         if ind_t in ["SMA", "WMA", "EMA"]:
+            fn = getattr(self, ind_t.lower())
             # 1 MA
             if len(params) == 1:
                 short = params[0]
-                df["Short"] = ma_fn( df["Close"], short)
+                df["Short"] = fn(df["Close"], short)
             # 2 MAs
             elif len(params) == 2:
                 short, long = params
-                df["Short"] = ma_fn( df["Close"], short)
-                df["Long"]  = ma_fn( df["Close"], long)
+                df["Short"] = fn(df["Close"], short)
+                df["Long"]  = fn(df["Close"], long)
             # 3 MAs
             elif len(params) == 3:
                 short, medium, long = params
-                df["Short"] = ma_fn( df["Close"], short)
-                df["Med"]   = ma_fn( df["Close"], medium)
-                df["Long"]  = ma_fn( df["Close"], long)
-            else:
-                raise ValueError(f"{ind_t} requires 1, 2 or 3 periods, but received {len(params)}.")    
+                df["Short"] = fn(df["Close"], short)
+                df["Mid"]   = fn(df["Close"], medium)
+                df["Long"]  = fn(df["Close"], long)
+        elif ind_t == "BB":
+            window, std_dev = params
+            df["BB_Mid"], df["BB_Upper"], df["BB_Lower"] = self.bollinger_bands(df["Close"], window, std_dev)
+        else:
+            raise ValueError(f"Unsupported indicator: {ind_t}.")    
         return df

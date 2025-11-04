@@ -80,7 +80,7 @@ def main():
             verb = "⏸️ NEUTRAL"
         
         # trading message
-        msg = (f"#{a['Ticker']} | {verb} ({a['Indicator']}{'/'.join(a['Parameters'])}) Duration {a['Signal_Length']:d} | Price R${a['Close']:.2f}\n"
+        msg = (f"#{a['Ticker']} | {verb} ({a['Indicator']}{'/'.join(a['Parameters'])}) Duration {a['Signal_Length']:d} | Price R$ {a['Close']:.2f}\n"
                f"Volume Strength: {a['Volume_Strength']:.2f}\n"
                f"Signal Confirmation: {a['Signal Confirmation']}/{len(confir)} BUY, {len(confir)-a['Signal Confirmation']}/{len(confir)} SELL\n"
                f"Entry Price: R$ {a['Entry_Price']:.2f}\n"
