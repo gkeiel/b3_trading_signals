@@ -21,6 +21,7 @@ class Backtester:
     def run_strategy(self, indicator):
         try:
             df     = self.df
+            ind_t  = indicator["ind_t"]
             params = indicator["ind_p"]   
     
             # calculate volume MA
@@ -28,18 +29,23 @@ class Backtester:
 
             # generate buy/sell signals
             df["Signal"] = 0
-            if len(params) == 1:
-                # 1 MA crossover
-                df.loc[df["Short"] > df["Close"], "Signal"] = 1         # buy signal  ->  1
-                df.loc[df["Short"] < df["Close"], "Signal"] = -1        # sell signal -> -1
-            elif len(params) == 2:
-                # 2 MAs crossover
-                df.loc[df["Short"] > df["Long"], "Signal"] = 1          # buy signal  ->  1
-                df.loc[df["Short"] < df["Long"], "Signal"] = -1         # sell signal -> -1
-            elif len(params) == 3:
-                # 3 MAs crossover
-                df.loc[(df["Short"] > df["Med"]) & (df["Med"] > df["Long"]), "Signal"] = 1                              # buy signal  ->  1
-                df.loc[(df["Short"] < df["Med"]) & (df["Med"] < df["Long"]), "Signal"] = -1                             # sell signal -> -1
+            if ind_t in ["SMA", "EMA", "WMA"]:
+                if len(params) == 1:
+                    # 1 MA crossover
+                    df.loc[df["Short"] > df["Close"], "Signal"] = 1         # buy signal
+                    df.loc[df["Short"] < df["Close"], "Signal"] = -1        # sell signal
+                elif len(params) == 2:
+                    # 2 MAs crossover
+                    df.loc[df["Short"] > df["Long"], "Signal"] = 1          # buy signal
+                    df.loc[df["Short"] < df["Long"], "Signal"] = -1         # sell signal
+                elif len(params) == 3:
+                    # 3 MAs crossover
+                    df.loc[(df["Short"] > df["Med"]) & (df["Med"] > df["Long"]), "Signal"] = 1                              # buy signal
+                    df.loc[(df["Short"] < df["Med"]) & (df["Med"] < df["Long"]), "Signal"] = -1                             # sell signal
+            elif ind_t == "BB":
+                df.loc[df["Close"] < df["BB_Lower"], "Signal"] = 1      # buy signal
+                df.loc[df["Close"] > df["BB_Lower"], "Signal"] = -1     # seel signal
+
             df["Signal_Length"] = df["Signal"].groupby((df["Signal"] != df["Signal"].shift()).cumsum()).cumcount() +1   # consecutive samples of same signal (signal length)
             df.loc[df["Signal"] == 0, "Signal_Length"] = 0                                                              # length is zero while there is no signal
             df["Volume_Strength"] = (df["Volume"] -df["VMA"])/df["VMA"]                                                 # volume strenght
@@ -76,14 +82,21 @@ class Backtester:
         # save results
         plt.figure(figsize=(12,6))
         plt.plot(self.df.index, self.df["Close"], label=f"{ticker}")
-        if "Short" in self.df and len(params) >= 1:
-            plt.plot(self.df.index, self.df["Short"], label=f"{ind_t}{params[0]}")
-        if "Long" in self.df and len(params) == 2:
-            plt.plot(self.df.index, self.df["Long"], label=f"{ind_t}{params[1]}")
-        if "Long" in self.df and len(params) >= 3:
-            plt.plot(self.df.index, self.df["Long"], label=f"{ind_t}{params[1]}")
-        if "Med" in self.df and len(params) >= 3:
-            plt.plot(self.df.index, self.df["Med"], label=f"{ind_t}{params[2]}")
+        
+        if ind_t in ["SMA", "EMA", "WMA"]:
+            if "Short" in self.df and len(params) >= 1:
+                plt.plot(self.df.index, self.df["Short"], label=f"{ind_t}{params[0]}")
+            if "Long" in self.df and len(params) == 2:
+                plt.plot(self.df.index, self.df["Long"], label=f"{ind_t}{params[1]}")
+            if "Long" in self.df and len(params) >= 3:
+                plt.plot(self.df.index, self.df["Long"], label=f"{ind_t}{params[1]}")
+            if "Med" in self.df and len(params) >= 3:
+                plt.plot(self.df.index, self.df["Med"], label=f"{ind_t}{params[2]}")
+        elif ind_t == "BB":
+            plt.plot(self.df.index, self.df["BB_Mid"], label=f"{ind_t}{params[0]}")
+            plt.plot(self.df.index, self.df["BB_Upper"], color='r', label=f"{ind_t}{params[1]}")
+            plt.plot(self.df.index, self.df["BB_Lower"], color='r')
+
         plt.title(f"{ticker} - Price")
         plt.legend()
         plt.grid(True)
