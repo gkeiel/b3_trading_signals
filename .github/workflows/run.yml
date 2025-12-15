@@ -3,6 +3,8 @@ name: B3 trading signals bot
 on:
   schedule:
     - cron: "15 21 * * 1-5" # runs at 21:15 UTC, Monday-Friday
+    - cron: "15 22 * * 1-5" # runs at 22:15 UTC, Monday-Friday
+    - cron: "15 23 * * 1-5" # runs at 23:15 UTC, Monday-Friday
   workflow_dispatch:        # runs manualy if desired
 
 jobs:
@@ -12,6 +14,27 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Check if executed
+        id: flagcheck
+        run: |
+          TODAY=$(date +"%Y-%m-%d")
+          LAST=$(cat state/run_flag.txt || echo "none")
+
+          echo "Today: $TODAY"
+          echo "Last run: $LAST"
+
+          if [ "$LAST=$TODAY" ]; then
+            echo "already_ran=true" >> $GITHUB_OUTPUT
+          else
+            echo "already_ran=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Skip if executed
+        if: steps.flagcheck.outputs.already_ran == 'true'
+        run: |
+          echo "Execution already done. Skipping."
+          exit 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -30,6 +53,8 @@ jobs:
           echo "Attempt $i of 3."
             python b3_trading_signals_bot.py && break || echo "Attempt $i has failed. Retrying in 30 seconds." && sleep 30
           done
+          
+        retry: 3
 
       - name: Upload report
         uses: actions/upload-artifact@v4
