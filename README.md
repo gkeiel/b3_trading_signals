@@ -1,6 +1,6 @@
 # Sinais de negociação B3
 
-Este projeto disponibiliza um script Python para **geração automática de sinais de compra e venda de ativos da B3 (Bolsa de Valores Brasileira)**, aplicando estratégias de cruzamento de médias móveis em séries temporais do mercado à vista. Inclui um script para ***backtesting* e seleção das estratégias com melhor desempenho**, permitindo avaliar as abordagens antes de aplicá-las.
+Este projeto disponibiliza um script Python para **geração automática de sinais de compra e venda de ativos da B3 (Bolsa de Valores Brasileira)**, aplicando estratégias de indicadores técnicos em séries temporais do mercado à vista: cruzamento de médias móveis e bandas de Bollinger. Inclui um script para ***backtesting* e seleção das estratégias com melhor desempenho**, permitindo avaliar as abordagens antes de aplicá-las.
 
 Como principais vantagens, o projeto proporciona:
 - envio de **sinais de negociação recorrentes via canal no Telegram** e que **evitem a necessidade de análise gráfica**.
@@ -13,7 +13,7 @@ Canal Telegram aberto com sinais diários executado via GitHub Actions. Todos po
 ## 📊 Funcionalidades
 
 - **Download de dados**: Realiza o download de dados de mercado pela API Yahoo Finance.
-- **Cruzamento de médias móveis**: Implementa estratégias de cruzamento de 2 ou 3 médias móveis (SMA, WMA ou EMA) para identificar possíveis tendências.
+- **Estratégias via indicadores técnicos**: Implementa estratégias de cruzamento de 2 ou 3 médias móveis (SMA, WMA ou EMA), bandas de Bollinger (BB), para identificar possíveis tendências.
 - ***Backtesting* das estratégias**: Realiza teste das estratégias com dados históricos, gerando figuras e resumo para tomada de decisão.
 - **Avaliação de performance**: Avalia desempenho frente a uma função objetivo de ponderação e classifica as melhores estratégias.
 - **Previsão do preço futuro**: Realiza predições baseadas em aprendizado de máquina supervisionado, aplicando algoritmos de árvores de decisão.
@@ -23,7 +23,7 @@ Canal Telegram aberto com sinais diários executado via GitHub Actions. Todos po
 
 ## 📈 Estratégias Disponíveis
 
-O projeto atualmente suporta as estratégias de **cruzamento duplo** e **cruzamento triplo** de médias móveis para geração de sinais de negociação, usando os seguintes métodos de cálculo:
+O projeto suporta as estratégias de **bandas de Bollinger** e **cruzamento de duas e três médias móveis** para a geração de sinais de negociação, usando os seguintes métodos de cálculo:
 - **SMA (Simple Moving Average)** - Média móvel simples.
 - **EMA (Exponential Moving Average)** - Média móvel exponencial.
 - **WMA (Weighted Moving Average)** – Média móvel ponderada.
@@ -108,7 +108,7 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
   - alteração para o paradigma de orientação a objeto (POO); ✅
   - melhoria na função objetivo com novas ponderações e *presets*; ✅
   - predição de preço futuro via árvores de decisão; ✅
-  - mais indicadores para o preço e estratégias;
+  - mais indicadores para o preço e estratégias; (✅)
   - alertas/relatório por e-mail.
 - Sobre bases de dados:
   - API Yahoo Finance: latência de 15 minutos para dados intradiários, sem limite de requisições;
