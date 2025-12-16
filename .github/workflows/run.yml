@@ -3,8 +3,8 @@ name: B3 trading signals bot
 on:
   schedule:
     - cron: "15 21 * * 1-5" # runs at 21:15 UTC, Monday-Friday
+    - cron: "45 21 * * 1-5" # runs at 21:45 UTC, Monday-Friday
     - cron: "15 22 * * 1-5" # runs at 22:15 UTC, Monday-Friday
-    - cron: "15 23 * * 1-5" # runs at 23:15 UTC, Monday-Friday
   workflow_dispatch:        # runs manualy if desired
 
 jobs:
@@ -15,16 +15,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Run flag cache
+        uses: actions/cache@v4
+        with:
+          path: state
+          key: run-flag-${{ runner.os }}
+
       - name: Check if executed
         id: flagcheck
         run: |
           TODAY=$(date +"%Y-%m-%d")
-          LAST=$(cat state/run_flag.txt || echo "none")
+          mkdir -p state
+          LAST=$(cat state/run_flag.txt 2>/dev/null || echo "none")
 
           echo "Today: $TODAY"
           echo "Last run: $LAST"
 
-          if [ "$LAST=$TODAY" ]; then
+          if [ "$LAST" = "$TODAY" ]; then
             echo "already_ran=true" >> $GITHUB_OUTPUT
           else
             echo "already_ran=false" >> $GITHUB_OUTPUT
@@ -53,11 +60,21 @@ jobs:
           echo "Attempt $i of 3."
             python b3_trading_signals_bot.py && break || echo "Attempt $i has failed. Retrying in 30 seconds." && sleep 30
           done
-          
-        retry: 3
 
+      - name: Mark execution
+        if: success()
+        run: |
+          date +"%Y-%m-%d" > state/run_flag.txt
+          
       - name: Upload report
         uses: actions/upload-artifact@v4
         with:
           name: report
           path: data/report/report.xlsx
+
+      - name: Save run flag cache
+        if: success()
+        uses: actions/cache/save@v4
+        with:
+          path: state
+          key: run-flag-${{ runner.os }}
