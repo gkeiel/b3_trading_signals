@@ -1,6 +1,6 @@
 # Sinais de negociação B3
 
-Este projeto disponibiliza um script Python para **geração automática de sinais de compra e venda de ativos da B3 (Bolsa de Valores Brasileira)**, aplicando estratégias com indicadores técnicos nas séries temporais do mercado à vista: cruzamento de médias móveis, cruzamento em bandas de Bollinger e média móvel de convergência/divergência. Inclui um script para ***backtesting* e seleção das estratégias com melhor desempenho**, permitindo avaliar as abordagens antes de aplicá-las.
+Este projeto disponibiliza um script Python para **geração automática de sinais de compra e venda de ativos da B3 (Bolsa de Valores Brasileira)**, aplicando estratégias com indicadores técnicos nas séries temporais do mercado à vista. Inclui um script para ***backtesting* e seleção das estratégias com melhor desempenho**, permitindo avaliar as abordagens antes de aplicá-las.
 
 Como principais vantagens, o projeto proporciona:
 - envio de **sinais de negociação recorrentes via canal no Telegram** e que **evitem a necessidade de análise gráfica**.
