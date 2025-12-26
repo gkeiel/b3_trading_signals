@@ -1,11 +1,11 @@
 # Sinais de negociação B3
 
-Este projeto disponibiliza um script Python para **geração automática de sinais de compra e venda de ativos da B3 (Bolsa de Valores Brasileira)**, aplicando estratégias de indicadores técnicos em séries temporais do mercado à vista: cruzamento de médias móveis e bandas de Bollinger. Inclui um script para ***backtesting* e seleção das estratégias com melhor desempenho**, permitindo avaliar as abordagens antes de aplicá-las.
+Este projeto disponibiliza um script Python para **geração automática de sinais de compra e venda de ativos da B3 (Bolsa de Valores Brasileira)**, aplicando estratégias com indicadores técnicos nas séries temporais do mercado à vista: cruzamento de médias móveis, cruzamento em bandas de Bollinger e média móvel de convergência/divergência. Inclui um script para ***backtesting* e seleção das estratégias com melhor desempenho**, permitindo avaliar as abordagens antes de aplicá-las.
 
 Como principais vantagens, o projeto proporciona:
 - envio de **sinais de negociação recorrentes via canal no Telegram** e que **evitem a necessidade de análise gráfica**.
 - usa **aprendizado de máquina** para a geração de sinal de confirmação.
-- **código aberto** permitindo **flexibilidade para escolha das médias móveis** e comparação entre estratégias.
+- **código aberto** permitindo **flexibilidade para escolha dos indicadores** e comparação entre estratégias.
 
 Canal Telegram aberto com sinais diários executado via GitHub Actions. Todos podem inscrever-se para uma impressão do que o *bot* pode oferecer.
 [t.me/b3_trading_signals_free](https://t.me/b3_trading_signals_free)
@@ -13,20 +13,23 @@ Canal Telegram aberto com sinais diários executado via GitHub Actions. Todos po
 ## 📊 Funcionalidades
 
 - **Download de dados**: Realiza o download de dados de mercado pela API Yahoo Finance.
-- **Estratégias via indicadores técnicos**: Implementa estratégias de cruzamento de 2 ou 3 médias móveis (SMA, WMA ou EMA), bandas de Bollinger (BB), para identificar possíveis tendências.
+- **Estratégias via indicadores técnicos**: Implementa estratégias de cruzamento de 2 ou 3 médias móveis (SMA, WMA ou EMA), bandas de Bollinger (BB), média móvel de convergência/divergência para identificar possíveis tendências.
 - ***Backtesting* das estratégias**: Realiza teste das estratégias com dados históricos, gerando figuras e resumo para tomada de decisão.
 - **Avaliação de performance**: Avalia desempenho frente a uma função objetivo de ponderação e classifica as melhores estratégias.
-- **Previsão do preço futuro**: Realiza predições baseadas em aprendizado de máquina supervisionado, aplicando algoritmos de árvores de decisão.
+- **Previsão do preço futuro**: Realiza predições baseadas em aprendizado de máquina supervisionado, aplicando algoritmos regressores como *gradient boosting* e *random forest*.
 - **Notificações via Telegram**: Envia sinais de negociação provenientes da estratégia escolhida diretamente para o *smartphone*/computador.
 - **Agendamento automático**: Configura tarefa para execução recorrente via GitHub Actions ou então pelo Agendador de Tarefas do Windows.
 - **Arquivos de configuração**: Utiliza `.env` para variáveis de ambiente privadas, `.json` para parâmetros de configuração, `.txt` para lista de códigos, `.txt`para lista de indicadores e `.csv` para lista de estratégias.
 
 ## 📈 Estratégias Disponíveis
 
-O projeto suporta as estratégias de **bandas de Bollinger** e **cruzamento de duas e três médias móveis** para a geração de sinais de negociação, usando os seguintes métodos de cálculo:
-- **SMA (Simple Moving Average)** - Média móvel simples.
-- **EMA (Exponential Moving Average)** - Média móvel exponencial.
-- **WMA (Weighted Moving Average)** – Média móvel ponderada.
+O projeto suporta os seguintes indicadores para aplicação nas estratégias:
+- **cruzamento de duas e três médias móveis** usando:
+  - **SMA (Simple Moving Average)** - Média móvel simples.
+  - **EMA (Exponential Moving Average)** - Média móvel exponencial.
+  - **WMA (Weighted Moving Average)** – Média móvel ponderada.
+- **bandas de Bollinger**;
+- **média móvel de convergência/divergência**.
 
 Essas opções permitem que o usuário compare o desempenho de diferentes abordagens dentro da B3.
 
@@ -108,7 +111,7 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
   - alteração para o paradigma de orientação a objeto (POO); ✅
   - melhoria na função objetivo com novas ponderações e *presets*; ✅
   - predição de preço futuro via árvores de decisão; ✅
-  - mais indicadores para o preço e estratégias; (✅)
+  - mais indicadores para o preço e estratégias; ✅...
   - alertas/relatório por e-mail.
 - Sobre bases de dados:
   - API Yahoo Finance: latência de 15 minutos para dados intradiários, sem limite de requisições;
