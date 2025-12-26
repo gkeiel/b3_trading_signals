@@ -32,6 +32,14 @@ class Indicator:
         upper  = middle +(std_dev*std)
         lower  = middle -(std_dev*std)
         return middle, upper, lower
+    
+    @staticmethod
+    def macd(series: pd.Series, fast: int = 12, slow: int = 26, signal: int = 9):
+        # moving average convergence divergence (MACD)
+        macd_line   = series.ewm(span=fast, adjust=False).mean() -series.ewm(span=slow, adjust=False).mean()
+        signal_line = macd_line.ewm(span=signal, adjust=False).mean()
+        histogram   = macd_line -signal_line
+        return macd_line, signal_line, histogram
         
     def setup_indicator(self, df):
         """
@@ -65,6 +73,9 @@ class Indicator:
         elif ind_t == "BB":
             window, std_dev = params
             df["BB_Mid"], df["BB_Upper"], df["BB_Lower"] = self.bollinger_bands(df["Close"], window, std_dev)
+        elif ind_t == "MACD":
+            fast, slow, signal = params
+            df["MACD"], df["MACD_Signal"], df["MACD_Histogram"] = self.macd(df["Close"], fast, slow, signal)
         else:
             raise ValueError(f"Unsupported indicator: {ind_t}.")    
         return df
