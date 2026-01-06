@@ -32,8 +32,8 @@ class Backtester:
             if ind_t in ["SMA", "EMA", "WMA"]:
                 if len(params) == 1:
                     # 1 MA crossover
-                    df.loc[df["Short"] > df["Close"], "Signal"] = 1         # buy signal (MA)
-                    df.loc[df["Short"] < df["Close"], "Signal"] = -1        # sell signal (MA)
+                    df.loc[df["Close"] > df["Short"], "Signal"] = 1         # buy signal (MA)
+                    df.loc[df["Close"] < df["Short"], "Signal"] = -1        # sell signal (MA)
                 elif len(params) == 2:
                     # 2 MAs crossover
                     df.loc[df["Short"] > df["Long"], "Signal"] = 1          
@@ -44,7 +44,7 @@ class Backtester:
                     df.loc[(df["Short"] < df["Med"]) & (df["Med"] < df["Long"]), "Signal"] = -1
             elif ind_t == "BB":
                 df.loc[df["Close"] < df["BB_Lower"], "Signal"] = 1          # buy signal (BB)
-                df.loc[df["Close"] > df["BB_Lower"], "Signal"] = -1         # seel signal (BB)
+                df.loc[df["Close"] > df["BB_Upper"], "Signal"] = -1         # seel signal (BB)
             elif ind_t == "MACD":
                 df.loc[df["MACD"] > df["MACD_Signal"], "Signal"] = 1        # buy signal (MACD)
                 df.loc[df["MACD"] < df["MACD_Signal"], "Signal"] = -1       # sell signal (MACD)
