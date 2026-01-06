@@ -15,10 +15,10 @@ class Strategies:
             self.preset = config.get("preset", "basic")
             
     PRESET = {
-        "basic":     {"w_return": 1.0, "w_trades": 0.02, "w_sharpe": 0, "w_drdown": 0},
+        "basic":     {"w_return": 1.0, "w_trades": 0.02, "w_sharpe": 0,    "w_drdown": 0},
         "balanced":  {"w_return": 1.0, "w_trades": 0.04, "w_sharpe": 0.01, "w_drdown": 0.05},
-        "agressive": {"w_return": 1.0, "w_trades": 0, "w_sharpe": 0.02, "w_drdown": 0},
-        "defensive": {"w_return": 1.0, "w_trades": 0.05, "w_sharpe": 0, "w_drdown": 0.05},
+        "agressive": {"w_return": 1.0, "w_trades": 0,    "w_sharpe": 0.02, "w_drdown": 0},
+        "defensive": {"w_return": 1.0, "w_trades": 0.05, "w_sharpe": 0,    "w_drdown": 0.05},
     }
             
     def load_config(self, path):
