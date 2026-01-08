@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 from core.loader import Loader
 from core.indicator import Indicator
 from core.backtester import Backtester

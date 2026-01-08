@@ -77,8 +77,16 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
   
   Após a execução do script `b3_trading_signals.py` são gerados gráficos de cada estratégia, planilhas para cada *ticker*, planilha com melhores resultados. As figuras geradas seguem o exemplo mostrado abaixo:
   <p align="center">
-     <img width="733" height="395" alt="B3SA3 SA_5_30" src="https://github.com/user-attachments/assets/5f7c268b-1265-405a-a42f-a59f89729cd4"/>
-     <img width="733" height="395" alt="B3SA3 SA_backtest_5_30" src="https://github.com/user-attachments/assets/c0cbff4a-7189-43dd-b6bc-000b4cea62b0"/>
+    <img
+      src="images/B3SA3_SMA.png"
+      alt="Optimization"
+      width="733"
+    />
+    <img
+      src="images/B3SA3_SMA_backtest.png"
+      alt="Optimization"
+      width="733"
+    />
   </p>
 
   Note como o ativo encerra o período avaliado próximo ao valor inicial, de modo que a estratégia *Buy & hold* resultaria em retorno nulo. Por outro lado, caso a estratégia SMA 5/30 fosse seguida à risca proporcionaria ao final do período um retorno de 20% sobre o valor investido, desconsiderando taxas de negociação. Ademais, a operação de venda a descoberto foi desconsiderada nos cálculos devido as taxas de aluguel envolvidas, embora possa facilmente ser habilitada no *backtest*.
@@ -87,7 +95,11 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
 
   Após a execução do script `b3_trading_signals_bot.py` são gerados sinais de negociação para as melhores estratégias escolhidas, seguindo o exemplo mostrado abaixo:
   <p align="center">
-     <img width="480" height="511" alt="telegram" src="https://github.com/user-attachments/assets/39ac0ee0-c816-4bd6-8742-b4884156051a" />
+    <img
+      src="images/telegram.png"
+      alt="Optimization"
+      width="480"
+    />
   </p>
 
   Note como é gerado um sinal de negociação para cada ativo, sugerindo a tendência de alta, baixa ou neutralidade baseado na estratégia escolhida e a duração dessa tendência, que mostra a quantas amostras a tendência permanece sem trocar de lado. Adicionalmente, são mostrados dados de volume e das principais médias móveis como indicadores de força dessa tendência.
@@ -111,7 +123,7 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
   - alteração para o paradigma de orientação a objeto (POO); ✅
   - melhoria na função objetivo com novas ponderações e *presets*; ✅
   - predição de preço futuro via árvores de decisão; ✅
-  - mais indicadores para o preço e estratégias; ✅...
+  - mais indicadores para o preço e estratégias; ✅
   - alertas/relatório por e-mail.
 - Sobre bases de dados:
   - API Yahoo Finance: latência de 15 minutos para dados intradiários, sem limite de requisições;
