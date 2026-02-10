@@ -1,19 +1,19 @@
 # Sinais de negociação B3
 
-Este projeto disponibiliza um script Python para **geração automática de sinais de compra e venda de ativos da B3 (Bolsa de Valores Brasileira)**, aplicando estratégias com indicadores técnicos nas séries temporais do mercado à vista. Inclui um script para ***backtesting* e seleção das estratégias com melhor desempenho**, permitindo avaliar as abordagens antes de aplicá-las.
+Este projeto disponibiliza um script Python para **geração automática de sinais de compra e venda de ativos da B3 (Bolsa de Valores Brasileira)**, aplicando estratégias com indicadores técnicos em séries temporais do mercado à vista. Inclui um script para ***backtesting* e seleção das estratégias com melhor desempenho**, permitindo avaliar as abordagens antes de aplicá-las.
 
 Como principais vantagens, o projeto proporciona:
 - envio de **sinais de negociação recorrentes via canal no Telegram** e que **evitem a necessidade de análise gráfica**.
-- usa **aprendizado de máquina** para a geração de sinal de confirmação.
-- **código aberto** permitindo **flexibilidade para escolha dos indicadores** e comparação entre estratégias.
+- uso de **aprendizado de máquina** para a geração de sinal de confirmação.
+- **código aberto** permitindo **flexibilidade para escolha e parametrização dos indicadores** e comparação entre estratégias.
 
-Canal Telegram aberto com sinais diários executado via GitHub Actions. Todos podem inscrever-se para uma impressão do que o *bot* pode oferecer.
+Canal Telegram aberto com sinais diários executado via GitHub Actions, o qual todos podem inscrever-se para uma impressão do que o *bot* pode oferecer:
 [t.me/b3_trading_signals_free](https://t.me/b3_trading_signals_free)
 
 ## 📊 Funcionalidades
 
 - **Download de dados**: Realiza o download de dados de mercado pela API Yahoo Finance.
-- **Estratégias via indicadores técnicos**: Implementa estratégias de cruzamento de 2 ou 3 médias móveis (SMA, WMA ou EMA), bandas de Bollinger (BB), média móvel de convergência/divergência para identificar possíveis tendências.
+- **Estratégias via indicadores técnicos**: Implementa estratégias de cruzamento de 2 ou 3 médias móveis (SMA, WMA ou EMA), bandas de Bollinger (BB), média móvel de convergência/divergência (MACD), a fim de identificar possíveis tendências.
 - ***Backtesting* das estratégias**: Realiza teste das estratégias com dados históricos, gerando figuras e resumo para tomada de decisão.
 - **Avaliação de performance**: Avalia desempenho frente a uma função objetivo de ponderação e classifica as melhores estratégias.
 - **Previsão do preço futuro**: Realiza predições baseadas em aprendizado de máquina supervisionado, aplicando algoritmos regressores como *gradient boosting* e *random forest*.
@@ -23,7 +23,7 @@ Canal Telegram aberto com sinais diários executado via GitHub Actions. Todos po
 
 ## 📈 Estratégias Disponíveis
 
-O projeto suporta os seguintes indicadores para aplicação nas estratégias:
+O projeto suporta estratégias baseadas nos seguintes indicadores:
 - **cruzamento de duas e três médias móveis** usando:
   - **SMA (Simple Moving Average)** - Média móvel simples.
   - **EMA (Exponential Moving Average)** - Média móvel exponencial.
@@ -31,7 +31,54 @@ O projeto suporta os seguintes indicadores para aplicação nas estratégias:
 - **bandas de Bollinger**;
 - **média móvel de convergência/divergência**.
 
-Essas opções permitem que o usuário compare o desempenho de diferentes abordagens dentro da B3.
+## 🧩 Estrutura
+
+O projeto é organizado em torno de uma arquitetura modular, onde cada classe tem uma responsabilidade:
+- **Loader** gerencia arquivos de configuração do mercado.
+- **Indicator** gera os indicadores técnicos.
+- **Backtester** executa sinais de negociação nos dados históricos e calcula métricas de desempenho.
+- **Forecaster** gera previsões do preço futuro.
+- **Strategies** gera pontuação e classifica estratégias com base em função objetivo configurável.
+- **Exporter** exporta resultados para planilhas.
+- **Notifier** envia notificações por aplicativo.
+
+O projeto possui a seguinte estrutura:
+
+ ```text
+ b3_trading_signals/ 
+ │  
+ ├── b3_trading_signals.py 
+ ├── b3_trading_signals_bot.py 
+ ├── b3_trading_signals_task_scheduler.py 
+ |  
+ ├── core/   
+ │   ├── __init__.py  
+ │   ├── loader.py  
+ │   ├── indicator.py  
+ │   ├── backtester.py  
+ │   ├── forecaster.py  
+ │   ├── strategies.py    
+ │   ├── exporter.py  
+ │   └── notifier.py  
+ │  
+ ├── config/  
+ │   ├── config.json  
+ │   ├── tickers.json  
+ │   └── indicators.json    
+ │  
+ ├── data/  
+ │   ├── debug/  
+ │   ├── report/  
+ │   └── results/ 
+ |       ├── best_results.xlsx 
+ │       ├── strategies.csv  
+ │       └── backtests.png    
+ │  
+ ├── images/  
+ ├── requirements.txt  
+ ├── README.md  
+ └── LICENSE  
+ ```
 
 ## ⚙️ Como Usar
 
@@ -48,7 +95,7 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
 2. **Configurar códigos e indicadores**
    - Em `config.json` altere os parâmetros de configuração.
    - Em `tickers.txt` adicione os códigos das ações que deseja avaliar, um por linha.
-   - Em `indicators.txt` adicione os indicadores que deseja gerar, um por linha. Inicialmente apenas SMA, WMA e EMA são implementáveis.
+   - Em `indicators.txt` adicione os indicadores que deseja gerar, um por linha.
    - Em `strategies.csv` são salvos os códigos das ações que deseja gerar sinais de negociação, cada qual com a respectiva melhor estratégia.
 
 3. **Configurar Telegram**
@@ -79,12 +126,12 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
   <p align="center">
     <img
       src="images/B3SA3_SMA.png"
-      alt="Optimization"
+      alt=" "
       width="733"
     />
     <img
       src="images/B3SA3_SMA_backtest.png"
-      alt="Optimization"
+      alt=" "
       width="733"
     />
   </p>
@@ -97,22 +144,12 @@ Essas opções permitem que o usuário compare o desempenho de diferentes aborda
   <p align="center">
     <img
       src="images/telegram.png"
-      alt="Optimization"
+      alt=" "
       width="480"
     />
   </p>
 
   Note como é gerado um sinal de negociação para cada ativo, sugerindo a tendência de alta, baixa ou neutralidade baseado na estratégia escolhida e a duração dessa tendência, que mostra a quantas amostras a tendência permanece sem trocar de lado. Adicionalmente, são mostrados dados de volume e das principais médias móveis como indicadores de força dessa tendência.
-
-## 🧩 Estrutura do Projeto
-
-- `b3_trading_signals.py` → Arquivo principal para *backtest* e seleção das melhores estratégias.
-- `b3_trading_signals_bot.py` → Arquivo principal para geração de sinais diários e notificações via Telegram.
-- `b3_trading_signals_task_scheduler.py` → Criação de execução agendada no Windows.
-- `core/` → Classes e funções reutilizáveis.
-- `tickers.txt` → Lista de *tickers* para análise.
-- `indicators.txt` → Lista de indicadores para análise.
-- `strategies.csv` → Lista de estratégias para sinais de negociação consistindo de *tickers* e seus indicadores.
 
 ## 📌 Observações
 
@@ -136,4 +173,4 @@ Este repositório é mantido de forma independente, durante o tempo livre. Se o 
 
 - [PayPal](https://www.paypal.com/donate/?hosted_button_id=BF6E8J7P32KWE)  
 
-Seu apoio ajuda a manter e evoluir o projeto, adicionando novos indicadores, melhorias e documentação.
+Seu apoio ajuda a manter e evoluir o projeto, possibilitando a adição de novos indicadores, funcionalidades e aprimorar a documentação.
