@@ -87,7 +87,7 @@ def main():
 if __name__ == "__main__":
     max_attempt = 3
     
-    for attempt in range(max_attempt):
+    for attempt in range(1,max_attempt+1):
         try:
             print(f"Attempt {attempt} of {max_attempt}.")
             main()
