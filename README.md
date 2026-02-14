@@ -167,10 +167,19 @@ O projeto possui a seguinte estrutura:
   - API Brapi em seu plano gratuito: latência de 30 minutos, limite mensal de 15000 requisições;
   - Outras APIs: latências similares e/ou envolvem custo.
 
-## 🤝 Apoio
+## 🚀 Versão Premium
 
-Este repositório é mantido de forma independente, durante o tempo livre. Se o código lhe foi útil e deseja apoiar o seu desenvolvimento contínuo, considere fazer uma doação:
+A versão Premium desbloqueia recursos avançados para automação e notificações profissionais. Veja acomparação das funcionalidades:
 
-- [PayPal](https://www.paypal.com/donate/?hosted_button_id=BF6E8J7P32KWE)  
+| Funcionalidade            | Free | Premium |
+|---------------------------|-------|------|
+| Backtest                  |  ✅  |  ✅  |
+| Avaliação das estratégias |  ✅  |  ✅  |
+| Notificação Telegram      |  ✅  |  ✅  |
+| Notificação WhatsApp      |  ❌  |  ✅  |
+| Notificação Gmail         |  ❌  |  ✅  |
 
-Seu apoio ajuda a manter e evoluir o projeto, possibilitando a adição de novos indicadores, funcionalidades e aprimorar a documentação.
+Se esse projeto o ajudou, considere adquirir a versão Premium:   
+👉 https://payhip.com/b/PU9tc  
+
+
