@@ -7,7 +7,7 @@ Como principais vantagens, o projeto proporciona:
 - uso de **aprendizado de máquina** para a geração de sinal de confirmação.
 - **código aberto** permitindo **flexibilidade para escolha e parametrização dos indicadores** e comparação entre estratégias.
 
-Canal Telegram aberto com sinais diários executado via GitHub Actions, o qual todos podem inscrever-se para uma impressão do que o *bot* pode oferecer:
+Canal Telegram aberto com sinais diários executado via GitHub Actions, onde todos podem se inscrever para uma impressão do que o *bot* pode oferecer:
 [t.me/b3_trading_signals_free](https://t.me/b3_trading_signals_free)
 
 ## 📊 Funcionalidades
@@ -175,9 +175,9 @@ A versão Premium desbloqueia recursos avançados para automação e notificaç�
 |---------------------------|-------|------|
 | Backtest                  |  ✅  |  ✅  |
 | Avaliação das estratégias |  ✅  |  ✅  |
-| Notificação Telegram      |  ✅  |  ✅  |
-| Notificação WhatsApp      |  ❌  |  ✅  |
-| Notificação Gmail         |  ❌  |  ✅  |
+| Notificações Telegram     |  ✅  |  ✅  |
+| Notificações WhatsApp     |  ❌  |  ✅  |
+| Relatório Gmail           |  ❌  |  ✅  |
 
 Se esse projeto o ajudou, considere adquirir a versão Premium:   
 👉 https://payhip.com/b/PU9tc  
